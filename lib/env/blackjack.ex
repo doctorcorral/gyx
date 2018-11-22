@@ -16,17 +16,17 @@ defmodule Env.Blackjack do
     GenServer.start_link(__MODULE__, %Env.Blackjack{}, name: __MODULE__)
   end
 
-  def get_state do
-    GenServer.call(__MODULE__, :get_state)
+  def get_state(pid) do
+    GenServer.call(pid, :get_state)
   end
 
-  def draw_card do
-    #FIXME
-    #@deck |> Enum.random()
+  def draw_card() do
+    # FIXME
+    # @deck |> Enum.random()
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10] |> Enum.random()
   end
 
-  def draw_hand do
+  def draw_hand() do
     [draw_card(), draw_card()]
   end
 
@@ -50,8 +50,8 @@ defmodule Env.Blackjack do
 
   def step(action) when action not in @action_space, do: {:reply, :error, "Invalid action"}
 
-  def step(action) do
-    GenServer.call(__MODULE__, {:act, action})
+  def step(pid, action) do
+    GenServer.call(pid, {:act, action})
   end
 
   def get_until(hand, v \\ 17) do
@@ -76,16 +76,17 @@ defmodule Env.Blackjack do
   def handle_call({:act, 0}, _from, state = %Env.Blackjack{player: player, dealer: dealer}) do
     state = %{state | dealer: get_until(state.dealer)}
 
-    {:reply, :ok,
-     {state, cmp(Enum.sum(player), Enum.sum(dealer) + is_natural(state.player)), true, %{}}}
+    {:reply,
+     {state, cmp(Enum.sum(player), Enum.sum(dealer) + is_natural(state.player)), true, %{}},
+     state}
   end
 
   def handle_call({:act, _action}, _from, state = %Env.Blackjack{}) do
     state = %{state | player: [draw_card() | state.player]}
 
     case is_bust(state.player) do
-      true -> {:reply, :ok, {state, -1, true, %{}}}
-      _ -> {:reply, :ok, {state, 0, false, %{}}}
+      true -> {:reply, {state, -1, true, %{}}, state}
+      _ -> {:reply, {state, 0, false, %{}}, state}
     end
   end
 end
