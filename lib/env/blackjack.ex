@@ -16,8 +16,8 @@ defmodule Env.Blackjack do
     GenServer.start_link(__MODULE__, %Env.Blackjack{}, name: __MODULE__)
   end
 
-  def get_state(pid) do
-    GenServer.call(pid, :get_state)
+  def get_state() do
+    GenServer.call(__MODULE__, :get_state)
   end
 
   def draw_card() do
@@ -50,8 +50,8 @@ defmodule Env.Blackjack do
 
   def step(action) when action not in @action_space, do: {:reply, :error, "Invalid action"}
 
-  def step(pid, action) do
-    GenServer.call(pid, {:act, action})
+  def step(action) do
+    GenServer.call(__MODULE__, {:act, action})
   end
 
   def get_until(hand, v \\ 17) do
