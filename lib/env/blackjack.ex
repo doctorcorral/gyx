@@ -56,6 +56,7 @@ defmodule Env.Blackjack do
 
   def get_until(hand, v \\ 17) do
     new_card = draw_card()
+
     case Enum.sum(hand ++ [new_card]) < v do
       true -> get_until([new_card | hand])
       _ -> [new_card | hand]
@@ -74,12 +75,12 @@ defmodule Env.Blackjack do
     {:reply, :ok, state}
   end
 
-  def handle_call({:act, 0}, _from, state = %Env.Blackjack{player: player, dealer: dealer}) do
+  def handle_call({:act, 0}, _from, state = %Env.Blackjack{}) do
     state = %{state | dealer: get_until(state.dealer)}
 
     {:reply,
-     {state, cmp(Enum.sum(player), Enum.sum(dealer) + is_natural(state.player)), true, %{}},
-     state}
+     {state, cmp(Enum.sum(state.player), Enum.sum(state.dealer) + is_natural(state.player)), true,
+      %{}}, state}
   end
 
   def handle_call({:act, _action}, _from, state = %Env.Blackjack{}) do
