@@ -9,11 +9,15 @@ defmodule Env.Blackjack do
   @action_space [0, 1]
 
   def init(_) do
-    {:ok, %Env.Blackjack{}}
+    {:ok, %Env.Blackjack{player: [draw_card()], dealer: [draw_card()]}}
   end
 
   def start_link do
     GenServer.start_link(__MODULE__, %Env.Blackjack{}, name: __MODULE__)
+  end
+
+  def reset() do
+    GenServer.call(__MODULE__, :reset)
   end
 
   def get_state() do
@@ -79,8 +83,8 @@ defmodule Env.Blackjack do
     state = %{state | dealer: get_until(state.dealer)}
 
     {:reply,
-     {state, cmp(Enum.sum(state.player), Enum.sum(state.dealer) + is_natural(state.player)), true,
-      %{}}, state}
+     {state, cmp(score(state.player), score(state.dealer) + is_natural(state.player)), true, %{}},
+     state}
   end
 
   def handle_call({:act, _action}, _from, state = %Env.Blackjack{}) do
@@ -90,5 +94,10 @@ defmodule Env.Blackjack do
       true -> {:reply, {state, -1, true, %{}}, state}
       _ -> {:reply, {state, 0, false, %{}}, state}
     end
+  end
+
+  def handle_call(:reset, _from, _state) do
+    new_state = %Env.Blackjack{player: [draw_card()], dealer: [draw_card()]}
+    {:reply, new_state, new_state}
   end
 end
