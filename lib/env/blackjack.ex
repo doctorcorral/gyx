@@ -1,5 +1,6 @@
 defmodule Env.Blackjack do
   use GenServer
+  alias Experience.Exp
 
   defstruct player: [], dealer: [], face_up_card: 0
 
@@ -39,22 +40,28 @@ defmodule Env.Blackjack do
     state = %{state | dealer: get_until(state.dealer)}
 
     {:reply,
-     {state, cmp(score(state.player), score(state.dealer) + is_natural(state.player)), true, %{}},
+      %Exp{state: state,
+           reward: cmp( score(state.player), score(state.dealer) ) + is_natural(state.player),
+           done: true,
+           info: %{}},
      state}
   end
+
+
+
 
   def handle_call({:act, _action}, _from, state = %Env.Blackjack{}) do
     state = %{state | player: [draw_card() | state.player]}
 
     case is_bust(state.player) do
-      true -> {:reply, {state, -1, true, %{}}, state}
-      _ -> {:reply, {state, 0, false, %{}}, state}
+      true -> {:reply, %Exp{state: state, reward: -1, done: true, info: %{}}, state}
+      _ -> {:reply, %Exp{state: state, reward: 0, done: false, info: %{}}, state}
     end
   end
 
   def handle_call(:reset, _from, _state) do
-    new_state = %Env.Blackjack{player: draw_hand(), dealer: draw_hand()}
-    {:reply, new_state, new_state}
+    new_env_state = %Env.Blackjack{player: draw_hand(), dealer: draw_hand()}
+    {:reply, new_env_state, new_env_state}
   end
 
   defp draw_card() do
