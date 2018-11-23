@@ -55,9 +55,10 @@ defmodule Env.Blackjack do
   end
 
   def get_until(hand, v \\ 17) do
-    case Enum.sum(hand ++ [draw_card()]) < v do
-      true -> get_until([draw_card() | hand])
-      _ -> hand
+    new_card = draw_card()
+    case Enum.sum(hand ++ [new_card]) < v do
+      true -> get_until([new_card | hand])
+      _ -> [new_card | hand]
     end
   end
 
