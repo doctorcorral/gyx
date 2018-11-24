@@ -31,6 +31,7 @@ defmodule Env.Blackjack do
   def get_state_abstraction() do
     GenServer.call(__MODULE__, :get_state_abstraction)
   end
+
   def step(action) when action not in @action_space, do: {:reply, :error, "Invalid action"}
 
   def step(action) do
@@ -49,9 +50,10 @@ defmodule Env.Blackjack do
 
   def handle_call({:act, 0}, _from, state = %Env.Blackjack{}) do
     state = %{state | dealer: get_until(state.dealer)}
+
     {:reply,
      %Exp{
-       state: state, #env_state_transformer(state),
+       state: env_state_transformer(state),
        reward: cmp(score(state.player), score(state.dealer)) + is_natural(state.player),
        done: true,
        info: %{}
@@ -60,9 +62,15 @@ defmodule Env.Blackjack do
 
   def handle_call({:act, _action}, _from, state = %Env.Blackjack{}) do
     state = %{state | player: [draw_card() | state.player]}
+
     case is_bust(state.player) do
-      true -> {:reply, %Exp{state: env_state_transformer(state), reward: -1, done: true, info: %{}}, state}
-      _ -> {:reply, %Exp{state: env_state_transformer(state), reward: 0, done: false, info: %{}}, state}
+      true ->
+        {:reply, %Exp{state: env_state_transformer(state), reward: -1, done: true, info: %{}},
+         state}
+
+      _ ->
+        {:reply, %Exp{state: env_state_transformer(state), reward: 0, done: false, info: %{}},
+         state}
     end
   end
 
@@ -108,5 +116,4 @@ defmodule Env.Blackjack do
       _ -> 0.0
     end
   end
-
 end
