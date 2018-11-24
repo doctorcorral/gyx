@@ -1,3 +1,7 @@
+defmodule Env.Blackjack.Abstraction do
+  defstruct player_sum: 0, dealer_sum: 0
+end
+
 defmodule Env.Blackjack do
   use GenServer
   alias Experience.Exp
@@ -24,6 +28,9 @@ defmodule Env.Blackjack do
     GenServer.call(__MODULE__, :get_state)
   end
 
+  def get_state_abstraction() do
+    GenServer.call(__MODULE__, :get_state_abstraction)
+  end
   def step(action) when action not in @action_space, do: {:reply, :error, "Invalid action"}
 
   def step(action) do
@@ -32,14 +39,19 @@ defmodule Env.Blackjack do
 
   def handle_call(:get_state, _from, state = %Env.Blackjack{}) do
     IO.inspect(state)
-    {:reply, :ok, state}
+    {:reply, state, state}
+  end
+
+  def handle_call(:get_state_abstraction, _from, state = %Env.Blackjack{player: p, dealer: d}) do
+    IO.inspect(state)
+    {:reply, %Env.Blackjack.Abstraction{player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}, state}
   end
 
   def handle_call({:act, 0}, _from, state = %Env.Blackjack{}) do
     state = %{state | dealer: get_until(state.dealer)}
     {:reply,
      %Exp{
-       state: env_state_transformer(state),
+       state: state, #env_state_transformer(state),
        reward: cmp(score(state.player), score(state.dealer)) + is_natural(state.player),
        done: true,
        info: %{}
