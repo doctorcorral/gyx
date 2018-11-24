@@ -2,8 +2,7 @@ defmodule Env.Blackjack do
   use GenServer
   alias Experience.Exp
 
-  defstruct player: [], dealer: [], face_up_card: 0
-
+  defstruct player: [], dealer: []
   # card values
   @deck [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
   # STICK, HIT
@@ -38,37 +37,33 @@ defmodule Env.Blackjack do
 
   def handle_call({:act, 0}, _from, state = %Env.Blackjack{}) do
     state = %{state | dealer: get_until(state.dealer)}
-
     {:reply,
-      %Exp{state: state,
-           reward: cmp( score(state.player), score(state.dealer) ) + is_natural(state.player),
-           done: true,
-           info: %{}},
-     state}
+     %Exp{
+       state: env_state_transformer(state),
+       reward: cmp(score(state.player), score(state.dealer)) + is_natural(state.player),
+       done: true,
+       info: %{}
+     }, state}
   end
-
-
-
 
   def handle_call({:act, _action}, _from, state = %Env.Blackjack{}) do
     state = %{state | player: [draw_card() | state.player]}
-
     case is_bust(state.player) do
-      true -> {:reply, %Exp{state: state, reward: -1, done: true, info: %{}}, state}
-      _ -> {:reply, %Exp{state: state, reward: 0, done: false, info: %{}}, state}
+      true -> {:reply, %Exp{state: env_state_transformer(state), reward: -1, done: true, info: %{}}, state}
+      _ -> {:reply, %Exp{state: env_state_transformer(state), reward: 0, done: false, info: %{}}, state}
     end
   end
 
   def handle_call(:reset, _from, _state) do
     new_env_state = %Env.Blackjack{player: draw_hand(), dealer: draw_hand()}
-    {:reply, new_env_state, new_env_state}
+    {:reply, %Exp{}, new_env_state}
   end
 
-  defp draw_card() do
-    # FIXME
-    # @deck |> Enum.random()
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10] |> Enum.random()
-  end
+  defp env_state_transformer(state), do: state
+
+  defp draw_card(), do: @deck |> Enum.random()
+
+  defp draw_hand(), do: [draw_card(), draw_card()]
 
   defp get_until(hand, v \\ 17) do
     new_card = draw_card()
@@ -86,9 +81,7 @@ defmodule Env.Blackjack do
     end
   end
 
-  defp is_bust(hand) do
-    Enum.sum(hand) > 21
-  end
+  defp is_bust(hand), do: Enum.sum(hand) > 21
 
   defp score(hand) do
     case is_bust(hand) do
@@ -104,7 +97,4 @@ defmodule Env.Blackjack do
     end
   end
 
-  defp draw_hand() do
-    [draw_card(), draw_card()]
-  end
 end
