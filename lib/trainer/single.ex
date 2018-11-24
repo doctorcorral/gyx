@@ -32,6 +32,7 @@ defmodule Trainer.Single do
   defp trainer(t = %Trainer.Single{}, 0), do: t
 
   defp trainer(t = %Trainer.Single{}, num_episodes) do
+    IO.puts("\n*** Episodes remaining: " <> inspect(num_episodes))
     t
     |> observe()
     |> run_episode(false)
@@ -48,8 +49,7 @@ defmodule Trainer.Single do
   end
 
   defp observe(t = %Trainer.Single{environment: env}) do
-    {:reply, :ok, state} = env.get_state()
-    %{ t | current_state: state}
+    %{ t | current_state: env.get_state()}
   end
 
 end
