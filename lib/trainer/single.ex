@@ -3,17 +3,20 @@ defmodule Trainer.Single do
 
   defstruct environment: nil, agent: nil, reward_sum: 0, experience: nil
 
-  def init(_) do
+  @env_module Env.Blackjack
+
+  def init(env_module \\ @env_module) do
+    env_module.start_link()
     {:ok,
      %Trainer.Single{
-       environment: Env.Blackjack.start_link(),
+       environment: env_module,
        agent: nil,
        experience: %Experience.Exp{}
      }}
   end
 
   def start_link do
-    GenServer.start_link(__MODULE__, %Trainer.Single{}, name: __MODULE__)
+    GenServer.start_link(__MODULE__,  @env_module , name: __MODULE__)
   end
 
   def train() do
@@ -21,18 +24,19 @@ defmodule Trainer.Single do
   end
 
   def handle_call(:train, _from, t = %Trainer.Single{experience: exp}) do
-    {:reply, trainlive(exp.done, t), t}
+    t.environment.reset()
+    {:reply, run_episode(exp.done, t), t}
   end
 
-  defp trainlive(true, _) do
+  defp run_episode(true, _) do
     IO.puts("> Finished")
     42
   end
 
-  defp trainlive(false, t = %Trainer.Single{}) do
-    exp = %Experience.Exp{reward: reward, done: done}= Env.Blackjack.step(Enum.random([1, 2]))
+  defp run_episode(false, t = %Trainer.Single{}) do
+    exp = %Experience.Exp{done: done} = t.environment.step(Enum.random([0, 1]))
     t = %{t | experience: exp}
-    IO.inspect(reward)
-    trainlive(done, t)
+    IO.inspect(exp)
+    run_episode(done, t)
   end
 end
