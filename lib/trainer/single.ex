@@ -4,20 +4,22 @@ defmodule Trainer.Single do
   defstruct environment: nil, agent: nil, rewards: [], current_state: nil, experience: nil
 
   @env_module Env.Blackjack
+  @agent Agents.BlackjackAgent
 
-  def init(env_module \\ @env_module) do
-    env_module.start_link()
+  def init(%{env: env, agent: agent}) do
+    env.start_link()
+    agent.start_link()
 
     {:ok,
      %Trainer.Single{
-       environment: env_module,
-       agent: nil,
+       environment: env,
+       agent: agent,
        experience: %Experience.Exp{}
      }}
   end
 
   def start_link do
-    GenServer.start_link(__MODULE__, @env_module, name: __MODULE__)
+    GenServer.start_link(__MODULE__, %{env: @env_module, agent: @agent}, name: __MODULE__)
   end
 
   def train() do
