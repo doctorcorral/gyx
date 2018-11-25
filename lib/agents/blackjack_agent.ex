@@ -65,13 +65,20 @@ defmodule Agents.BlackjackAgent do
         _from,
         state = %Agents.BlackjackAgent{}
       ) do
+    k_state = inspect(env_state)
+
+    state = %{
+      state
+      | state_value_table: Map.put_new_lazy(state.state_value_table, k_state, fn -> %{} end)
+    }
+
     with [{action, _}] <-
-           state.state_value_table[inspect(env_state)]
+           state.state_value_table[k_state]
            |> Enum.sort_by(fn {_, v} -> v end, &>=/2)
            |> Enum.take(1) do
-      {:reply, "->" <> inspect(action), state}
+      {:reply, "->" <> k_state <> inspect(action), state}
     else
-      _ -> {:reply, "->" <> inspect(0), state}
+      _ -> {:reply, "->" <> k_state <> inspect(0), state}
     end
   end
 end
