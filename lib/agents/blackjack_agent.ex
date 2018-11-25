@@ -34,9 +34,10 @@ defmodule Agents.BlackjackAgent do
   def handle_call(
         {:q_set, {env_state = %Abstraction{}, action, value}},
         _from,
-        state = %Agents.BlackjackAgent{}
+        state = %Agents.BlackjackAgent{state_value_table: Q}
       ) do
-    new_state = Map.put(state.state_value_table, inspect(env_state), %{inspect(action) => value})
+        k_state = inspect(env_state)
+    new_state = Map.put(Q, k_state, %{Q[k_state] | action => value})
     {:reply, new_state, %{state | state_value_table: new_state}}
   end
 
