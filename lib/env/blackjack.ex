@@ -48,29 +48,49 @@ defmodule Env.Blackjack do
     {:reply, %Env.Blackjack.Abstraction{player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}, state}
   end
 
-  def handle_call({:act, 0}, _from, state = %Env.Blackjack{}) do
-    state = %{state | dealer: get_until(state.dealer)}
+  def handle_call({:act, action = 0}, _from, state = %Env.Blackjack{}) do
+    next_state = %{state | dealer: get_until(state.dealer)}
+    experience = %Exp{
+      state: env_state_transformer(state),
+      action: action,
+      next_state: env_state_transformer(next_state),
+      reward: 0,
+      done: true,
+      info: %{}
+    }
+    reward = cmp(score(next_state.player), score(next_state.dealer)) + is_natural(state.player)
+    case is_bust(next_state.dealer) do
+       true -> {:reply, %{experience | reward: 1.0}, next_state}
+       false -> {:reply, %{experience | reward: reward}, next_state}
+    end
 
-    {:reply,
-     %Exp{
-       state: env_state_transformer(state),
-       reward: cmp(score(state.player), score(state.dealer)) + is_natural(state.player),
-       done: true,
-       info: %{}
-     }, state}
   end
 
-  def handle_call({:act, _action}, _from, state = %Env.Blackjack{}) do
-    state = %{state | player: [draw_card() | state.player]}
+  def handle_call({:act, action = 1}, _from, state = %Env.Blackjack{}) do
+    next_state = %{state | player: [draw_card() | state.player]}
 
-    case is_bust(state.player) do
+    case is_bust(next_state.player) do
       true ->
-        {:reply, %Exp{state: env_state_transformer(state), reward: -1, done: true, info: %{}},
-         state}
+        {:reply,
+         %Exp{
+           state: env_state_transformer(state),
+           action: action,
+           next_state: env_state_transformer(next_state),
+           reward: -1,
+           done: true,
+           info: %{}
+         }, next_state}
 
       _ ->
-        {:reply, %Exp{state: env_state_transformer(state), reward: 0, done: false, info: %{}},
-         state}
+        {:reply,
+         %Exp{
+           state: env_state_transformer(state),
+           action: action,
+           next_state: env_state_transformer(next_state),
+           reward: 0,
+           done: false,
+           info: %{}
+         }, next_state}
     end
   end
 
@@ -79,7 +99,9 @@ defmodule Env.Blackjack do
     {:reply, %Exp{}, new_env_state}
   end
 
-  defp env_state_transformer(state), do: state
+  defp env_state_transformer(%Env.Blackjack{player: p, dealer: d}) do
+    %Env.Blackjack.Abstraction{player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}
+  end
 
   defp draw_card(), do: @deck |> Enum.random()
 
