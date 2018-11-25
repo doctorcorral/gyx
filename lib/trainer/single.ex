@@ -1,7 +1,8 @@
 defmodule Trainer.Single do
   use GenServer
+  alias Env.Blackjack.Abstraction
 
-  defstruct environment: nil, agent: nil, rewards: [], current_state: nil, experience: nil
+  defstruct environment: nil, agent: nil, rewards: [], current_state: nil, experiences: []
 
   @env_module Env.Blackjack
   @agent Agents.BlackjackAgent
@@ -14,7 +15,7 @@ defmodule Trainer.Single do
      %Trainer.Single{
        environment: env,
        agent: agent,
-       experience: %Experience.Exp{}
+       experiences: []
      }}
   end
 
@@ -27,7 +28,6 @@ defmodule Trainer.Single do
   end
 
   def handle_call(:train, _from, t = %Trainer.Single{}) do
-    t.environment.reset()
     {:reply, trainer(t, 13), t}
   end
 
@@ -36,8 +36,8 @@ defmodule Trainer.Single do
   defp trainer(t = %Trainer.Single{}, num_episodes) do
     IO.puts("\n*** Episodes remaining: " <> inspect(num_episodes))
     t.environment.reset()
+    t = %{t | experiences: []}
     t
-    |> observe()
     |> run_episode(false)
     |> trainer(num_episodes - 1)
   end
@@ -45,13 +45,13 @@ defmodule Trainer.Single do
   defp run_episode(t = %Trainer.Single{}, true), do: t
 
   defp run_episode(t = %Trainer.Single{}, false) do
+    # These lines must be used when agent implementation is done
+    # action = t.agent.get_action(t.environment.get_state_abstraction())
+    # exp = %Experience.Exp{done: done} = t.environment.step(action)
     exp = %Experience.Exp{done: done} = t.environment.step(Enum.random([0, 1]))
-    t = %{t | experience: exp}
+    t = %{t | experiences: [exp | t.experiences]}
     IO.inspect(exp)
+    IO.inspect(t.experiences)
     run_episode(t, done)
-  end
-
-  defp observe(t = %Trainer.Single{environment: env}) do
-    %{t | current_state: env.get_state()}
   end
 end
