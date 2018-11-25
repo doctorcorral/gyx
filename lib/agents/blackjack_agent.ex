@@ -23,6 +23,13 @@ defmodule Agents.BlackjackAgent do
     GenServer.call(__MODULE__, {:get_action, env_state})
   end
 
+  def get_q() do
+    GenServer.call(__MODULE__, :get_q)
+  end
+
+  def handle_call(:get_q, _from, state = %Agents.BlackjackAgent{}),
+    do: {:reply, state.state_value_table, state}
+
   def handle_call(
         {:q_get, {env_state = %Abstraction{}, action}},
         _from,
@@ -34,21 +41,37 @@ defmodule Agents.BlackjackAgent do
   def handle_call(
         {:q_set, {env_state = %Abstraction{}, action, value}},
         _from,
-        state = %Agents.BlackjackAgent{state_value_table: Q}
+        state = %Agents.BlackjackAgent{}
       ) do
-        k_state = inspect(env_state)
-    new_state = Map.put(Q, k_state, %{Q[k_state] | action => value})
+    k_state = inspect(env_state)
+
+    state = %{
+      state
+      | state_value_table: Map.put_new_lazy(state.state_value_table, k_state, fn -> %{} end)
+    }
+
+    new_state =
+      Map.put(
+        state.state_value_table,
+        k_state,
+        Map.put(state.state_value_table[k_state], action, value)
+      )
+
     {:reply, new_state, %{state | state_value_table: new_state}}
   end
 
   def handle_call(
         {:get_action, env_state},
         _from,
-        state = %Agents.BlackjackAgent{state_value_table: Q}
+        state = %Agents.BlackjackAgent{}
       ) do
-    [{action, __}] =
-      Q[inspect(env_state)] |> Enum.sort_by(fn {_, v} -> v end, &>=/2) |> Enum.take(1)
-
-    {:reply, action, state}
+    with [{action, _}] <-
+           state.state_value_table[inspect(env_state)]
+           |> Enum.sort_by(fn {_, v} -> v end, &>=/2)
+           |> Enum.take(1) do
+      {:reply, "->" <> inspect(action), state}
+    else
+      _ -> {:reply, "->" <> inspect(0), state}
+    end
   end
 end
