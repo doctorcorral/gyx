@@ -45,10 +45,8 @@ defmodule Trainer.Single do
   defp run_episode(t = %Trainer.Single{}, true), do: t
 
   defp run_episode(t = %Trainer.Single{}, false) do
-    # These lines must be used when agent implementation is done
-    # action = t.agent.get_action(t.environment.get_state_abstraction())
-    # exp = %Experience.Exp{done: done} = t.environment.step(action)
-    exp = %Experience.Exp{done: done} = t.environment.step(Enum.random([0, 1]))
+    action = t.agent.get_action(t.environment.get_state_abstraction())
+    exp = %Experience.Exp{done: done} = t.environment.step(action)
     t = %{t | experiences: [exp | t.experiences]}
     IO.inspect(exp)
     IO.inspect(t.experiences)
