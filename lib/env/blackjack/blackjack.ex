@@ -3,6 +3,7 @@ defmodule Env.Blackjack.Abstraction do
 end
 
 defmodule Env.Blackjack do
+  @behaviour Env
   use GenServer
   alias Experience.Exp
 
@@ -12,6 +13,7 @@ defmodule Env.Blackjack do
   # STICK, HIT
   @action_space [0, 1]
 
+  @impl true
   def init(_) do
     {:ok, %Env.Blackjack{player: draw_hand(), dealer: draw_hand()}}
   end
@@ -20,10 +22,12 @@ defmodule Env.Blackjack do
     GenServer.start_link(__MODULE__, %Env.Blackjack{}, name: __MODULE__)
   end
 
+  @impl Env
   def reset() do
     GenServer.call(__MODULE__, :reset)
   end
 
+  @impl true
   def get_state() do
     GenServer.call(__MODULE__, :get_state)
   end
@@ -34,6 +38,7 @@ defmodule Env.Blackjack do
 
   def step(action) when action not in @action_space, do: {:reply, :error, "Invalid action"}
 
+  @impl Env
   def step(action) do
     GenServer.call(__MODULE__, {:act, action})
   end
