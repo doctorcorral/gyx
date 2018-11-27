@@ -76,9 +76,9 @@ defmodule Agents.BlackjackAgent do
            state.state_value_table[k_state]
            |> Enum.sort_by(fn {_, v} -> v end, &>=/2)
            |> Enum.take(1) do
-      {:reply, "->" <> k_state <> inspect(action), state}
+      {:reply, action, state}
     else
-      _ -> {:reply, "->" <> k_state <> inspect(0), state}
+      _ -> {:reply, Enum.random([0, 1]), state}
     end
   end
 end
