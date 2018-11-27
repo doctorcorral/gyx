@@ -1,25 +1,25 @@
-defmodule Agents.BlackjackAgent do
+defmodule Gyx.Blackjack.IAgent do
   use GenServer
-  alias Env.Blackjack.Abstraction
+  alias Gyx.Blackjack.State
   defstruct state_value_table: %{}, action_space: [0, 1]
 
   def init(_) do
-    {:ok, %Agents.BlackjackAgent{}}
+    {:ok, %__MODULE__{}}
   end
 
-  def start_link do
-    GenServer.start_link(__MODULE__, %Agents.BlackjackAgent{}, name: __MODULE__)
+  def start_link(_, opts) do
+    GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
   end
 
-  def q_get(env_state = %Abstraction{}, action) do
+  def q_get(env_state = %State{}, action) do
     GenServer.call(__MODULE__, {:q_get, {env_state, action}})
   end
 
-  def q_set(env_state = %Abstraction{}, action, value) do
+  def q_set(env_state = %State{}, action, value) do
     GenServer.call(__MODULE__, {:q_set, {env_state, action, value}})
   end
 
-  def get_action(env_state = %Abstraction{}) do
+  def get_action(env_state = %State{}) do
     GenServer.call(__MODULE__, {:get_action, env_state})
   end
 
@@ -27,21 +27,21 @@ defmodule Agents.BlackjackAgent do
     GenServer.call(__MODULE__, :get_q)
   end
 
-  def handle_call(:get_q, _from, state = %Agents.BlackjackAgent{}),
+  def handle_call(:get_q, _from, state = %__MODULE__{}),
     do: {:reply, state.state_value_table, state}
 
   def handle_call(
-        {:q_get, {env_state = %Abstraction{}, action}},
+        {:q_get, {env_state = %State{}, action}},
         _from,
-        state = %Agents.BlackjackAgent{}
+        state = %__MODULE__{}
       ) do
     {:reply, state.state_value_table[inspect(env_state)][inspect(action)], state}
   end
 
   def handle_call(
-        {:q_set, {env_state = %Abstraction{}, action, value}},
+        {:q_set, {env_state = %State{}, action, value}},
         _from,
-        state = %Agents.BlackjackAgent{}
+        state = %__MODULE__{}
       ) do
     k_state = inspect(env_state)
 
@@ -63,7 +63,7 @@ defmodule Agents.BlackjackAgent do
   def handle_call(
         {:get_action, env_state},
         _from,
-        state = %Agents.BlackjackAgent{}
+        state = %__MODULE__{}
       ) do
     k_state = inspect(env_state)
 

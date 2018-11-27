@@ -12,9 +12,9 @@ defmodule Gyx.Supervisor do
 
   defp children do
     [
-      worker(Env.Blackjack.Abstraction, [[], [name: Env.Blackjack.Abstraction]]),
-      worker(Env.Blackjack, [[], [name: Env.Blackjack]]),
-      worker(Agents.BlackjackAgent, [[], [name: Agents.BlackjackAgent]])
+      worker(Env.Blackjack.Game, [[], [name: Env.Blackjack.Game]]),
+      worker(Gyx.Blackjack.IAgent, [[], [name: Gyx.Blackjack.IAgent]]),
+      worker(Gyx.Blackjack.Trainer, [[], [name: Gyx.Blackjack.Trainer]])
     ]
   end
 end
