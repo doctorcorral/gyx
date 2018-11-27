@@ -1,6 +1,5 @@
 defmodule Trainer.Single do
   use GenServer
-  alias Env.Blackjack.Abstraction
 
   defstruct environment: nil, agent: nil, rewards: [], current_state: nil, experiences: []
 
@@ -37,6 +36,7 @@ defmodule Trainer.Single do
     IO.puts("\n*** Episodes remaining: " <> inspect(num_episodes))
     t.environment.reset()
     t = %{t | experiences: []}
+
     t
     |> run_episode(false)
     |> trainer(num_episodes - 1)
