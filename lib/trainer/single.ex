@@ -1,8 +1,18 @@
 defmodule Trainer.Single do
   use GenServer
-  alias Env.Blackjack.Abstraction
 
-  defstruct environment: nil, agent: nil, rewards: [], current_state: nil, experiences: []
+  @enforce_keys [:environment, :agent]
+  @fields quote(
+            do: [
+              environment: Env.Blackjack.t,
+              agent: Agents.BlackjackAgent.t,
+              experiences: []
+            ]
+          )
+
+  defstruct Keyword.keys(@fields)
+
+  @type t() :: %__MODULE__{unquote_splicing(@fields)}
 
   @env_module Env.Blackjack
   @agent Agents.BlackjackAgent
@@ -53,3 +63,4 @@ defmodule Trainer.Single do
     run_episode(t, done)
   end
 end
+
