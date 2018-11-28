@@ -1,7 +1,9 @@
 defmodule Agents.BlackjackAgent do
   use GenServer
   alias Env.Blackjack.Abstraction
+
   defstruct state_value_table: %{}, action_space: [0, 1]
+  @type t :: %__MODULE__{state_value_table: %{}, action_space: []}
 
   def init(_) do
     {:ok, %Agents.BlackjackAgent{}}
