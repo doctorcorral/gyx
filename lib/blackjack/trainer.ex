@@ -3,13 +3,13 @@ defmodule Gyx.Blackjack.Trainer do
 
   defstruct environment: nil, agent: nil, rewards: [], current_state: nil, experiences: []
 
-  @env_module Env.Blackjack.Game
+  @env_module Gyx.Blackjack.Game
   @agent Gyx.Blackjack.IAgent
 
   def init(_) do
     {:ok,
      %Gyx.Blackjack.Trainer{
-       environment: Env.Blackjack.Game,
+       environment: Gyx.Blackjack.Game,
        agent: Gyx.Blackjack.IAgent,
        experiences: []
      }}

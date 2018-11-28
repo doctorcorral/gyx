@@ -1,4 +1,5 @@
-defmodule Env.Blackjack.Game do
+defmodule Gyx.Blackjack.Game do
+  alias Gyx.Framework.Env
   @behaviour Env
   use GenServer
   alias Experience.Exp
