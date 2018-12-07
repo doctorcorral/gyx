@@ -7,7 +7,6 @@ defmodule Env.Blackjack do
   use GenServer
   alias Experience.Exp
 
-  #@enforce_keys [:player, :dealer]
   @fields quote(
             do: [
               player: [],
