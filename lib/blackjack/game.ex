@@ -4,7 +4,16 @@ defmodule Gyx.Blackjack.Game do
   use GenServer
   alias Experience.Exp
 
-  defstruct player: [], dealer: []
+  @fields quote(
+            do: [
+              player: [],
+              dealer: [],
+            ]
+          )
+  defstruct Keyword.keys(@fields)
+  @type t() :: %__MODULE__{unquote_splicing(@fields)}
+
+
   # card values
   @deck [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
   # STICK, HIT
@@ -98,6 +107,7 @@ defmodule Gyx.Blackjack.Game do
     end
   end
 
+  @impl true
   def handle_call(:reset, _from, _state) do
     new_env_state = %__MODULE__{player: draw_hand(), dealer: draw_hand()}
     {:reply, %Exp{}, new_env_state}

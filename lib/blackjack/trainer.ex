@@ -1,7 +1,18 @@
 defmodule Gyx.Blackjack.Trainer do
   use GenServer
 
-  defstruct environment: nil, agent: nil, rewards: [], current_state: nil, experiences: []
+  @enforce_keys [:environment, :agent]
+  @fields quote(
+            do: [
+              environment: Env.Blackjack.t,
+              agent: Agents.BlackjackAgent.t,
+              experiences: []
+            ]
+          )
+
+  defstruct Keyword.keys(@fields)
+
+  @type t() :: %__MODULE__{unquote_splicing(@fields)}
 
   @env_module Gyx.Blackjack.Game
   @agent Gyx.Blackjack.IAgent
@@ -50,3 +61,4 @@ defmodule Gyx.Blackjack.Trainer do
     run_episode(t, done)
   end
 end
+

@@ -1,7 +1,9 @@
 defmodule Gyx.Blackjack.IAgent do
   use GenServer
   alias Gyx.Blackjack.State
+
   defstruct state_value_table: %{}, action_space: [0, 1]
+  @type t :: %__MODULE__{state_value_table: %{}, action_space: []}
 
   def init(_) do
     {:ok, %__MODULE__{}}

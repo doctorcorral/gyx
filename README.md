@@ -1,6 +1,12 @@
 # Gyx
 
-**TODO: Add description**
+The goal of this project is to explore the intrinsically distributed qualities of Elixir for implementing real world Reinforcement Learning environments. 
+
+At this moment, this repository contains ad hoc implementations of environments and interacting agents. 
+Initial abstractions are already stablished, so higher level programs like training procedures can seamesly be integrated with particular environment, agents, and learning strategies.
+
+
+
 
 ## Installation
 
@@ -18,4 +24,3 @@ end
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
 be found at [https://hexdocs.pm/gyx](https://hexdocs.pm/gyx).
-
