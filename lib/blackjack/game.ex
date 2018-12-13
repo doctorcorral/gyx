@@ -1,8 +1,5 @@
-defmodule Env.Blackjack.Abstraction do
-  defstruct player_sum: 0, dealer_sum: 0
-end
-
-defmodule Env.Blackjack do
+defmodule Gyx.Blackjack.Game do
+  alias Gyx.Framework.Env
   @behaviour Env
   use GenServer
   alias Experience.Exp
@@ -24,11 +21,11 @@ defmodule Env.Blackjack do
 
   @impl true
   def init(_) do
-    {:ok, %Env.Blackjack{player: draw_hand(), dealer: draw_hand()}}
+    {:ok, %__MODULE__{player: draw_hand(), dealer: draw_hand()}}
   end
 
-  def start_link do
-    GenServer.start_link(__MODULE__, %Env.Blackjack{}, name: __MODULE__)
+  def start_link(_, opts) do
+    GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
   end
 
   @impl Env
@@ -52,18 +49,19 @@ defmodule Env.Blackjack do
     GenServer.call(__MODULE__, {:act, action})
   end
 
-  def handle_call(:get_state, _from, state = %Env.Blackjack{}) do
+  def handle_call(:get_state, _from, state = %__MODULE__{}) do
     IO.inspect(state)
     {:reply, state, state}
   end
 
-  def handle_call(:get_state_abstraction, _from, state = %Env.Blackjack{player: p, dealer: d}) do
+  def handle_call(:get_state_abstraction, _from, state = %__MODULE__{player: p, dealer: d}) do
     IO.inspect(state)
-    {:reply, %Env.Blackjack.Abstraction{player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}, state}
+    {:reply, %Gyx.Blackjack.State{player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}, state}
   end
 
-  def handle_call({:act, action = 0}, _from, state = %Env.Blackjack{}) do
+  def handle_call({:act, action = 0}, _from, state = %__MODULE__{}) do
     next_state = %{state | dealer: get_until(state.dealer)}
+
     experience = %Exp{
       state: env_state_transformer(state),
       action: action,
@@ -72,15 +70,16 @@ defmodule Env.Blackjack do
       done: true,
       info: %{}
     }
-    reward = cmp(score(next_state.player), score(next_state.dealer)) + is_natural(state.player)
-    case is_bust(next_state.dealer) do
-       true -> {:reply, %{experience | reward: 1.0}, next_state}
-       false -> {:reply, %{experience | reward: reward}, next_state}
-    end
 
+    reward = cmp(score(next_state.player), score(next_state.dealer)) + is_natural(state.player)
+
+    case is_bust(next_state.dealer) do
+      true -> {:reply, %{experience | reward: 1.0}, next_state}
+      false -> {:reply, %{experience | reward: reward}, next_state}
+    end
   end
 
-  def handle_call({:act, action = 1}, _from, state = %Env.Blackjack{}) do
+  def handle_call({:act, action = 1}, _from, state = %__MODULE__{}) do
     next_state = %{state | player: [draw_card() | state.player]}
 
     case is_bust(next_state.player) do
@@ -110,12 +109,12 @@ defmodule Env.Blackjack do
 
   @impl true
   def handle_call(:reset, _from, _state) do
-    new_env_state = %Env.Blackjack{player: draw_hand(), dealer: draw_hand()}
+    new_env_state = %__MODULE__{player: draw_hand(), dealer: draw_hand()}
     {:reply, %Exp{}, new_env_state}
   end
 
-  defp env_state_transformer(%Env.Blackjack{player: p, dealer: d}) do
-    %Env.Blackjack.Abstraction{player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}
+  defp env_state_transformer(%__MODULE__{player: p, dealer: d}) do
+    %Gyx.Blackjack.State{player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}
   end
 
   defp draw_card(), do: @deck |> Enum.random()
