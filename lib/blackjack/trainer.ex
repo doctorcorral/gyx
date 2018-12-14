@@ -6,7 +6,7 @@ defmodule Gyx.Blackjack.Trainer do
             do: [
               environment: Env.Blackjack.t,
               agent: Agents.BlackjackAgent.t,
-              experiences: []
+              trajectory: []
             ]
           )
 
@@ -22,7 +22,7 @@ defmodule Gyx.Blackjack.Trainer do
      %Gyx.Blackjack.Trainer{
        environment: Gyx.Blackjack.Game,
        agent: Gyx.Blackjack.IAgent,
-       experiences: []
+       trajectory: []
      }}
   end
 
@@ -43,7 +43,7 @@ defmodule Gyx.Blackjack.Trainer do
   defp trainer(t = %__MODULE__{}, num_episodes) do
     IO.puts("\n*** Episodes remaining: " <> inspect(num_episodes))
     t.environment.reset()
-    t = %{t | experiences: []}
+    t = %{t | trajectory: []}
 
     t
     |> run_episode(false)
@@ -55,9 +55,9 @@ defmodule Gyx.Blackjack.Trainer do
   defp run_episode(t = %__MODULE__{}, false) do
     action = t.agent.get_action(t.environment.get_state_abstraction())
     exp = %Experience.Exp{done: done} = t.environment.step(action)
-    t = %{t | experiences: [exp | t.experiences]}
+    t = %{t | trajectory: [exp | t.trajectory]}
     IO.inspect(exp)
-    IO.inspect(t.experiences)
+    IO.inspect(t.trajectory)
     run_episode(t, done)
   end
 end
