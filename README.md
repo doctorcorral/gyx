@@ -1,3 +1,6 @@
+
+![test](https://github.com/favicon.ico)
+
 # Gyx
 
 The goal of this project is to explore the intrinsically distributed qualities of Elixir for implementing real world Reinforcement Learning environments. 
