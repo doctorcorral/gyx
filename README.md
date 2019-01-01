@@ -1,5 +1,5 @@
 
-![test](https://github.com/favicon.ico)
+![test](https://raw.githubusercontent.com/doctorcorral/gyx/master/images/gyxheader.png)
 
 # Gyx
 
