@@ -5,12 +5,12 @@ defmodule Gyx.FrozenLake.Game do
   alias Experience.Exp
 
   defstruct map: nil, x: nil, y: nil
-  @type t :: %__MODULE__{map: string, x: integer, y: integer}
+  @type t :: %__MODULE__{map: charlist, x: integer, y: integer}
 
-  @actions = %{0 => :left, 1 => :down, 2 => :right, 3 => :up}
-  @action_space = Map.keys(@actions)
+  @actions  %{0 => :left, 1 => :down, 2 => :right, 3 => :up}
+  @action_space  Map.keys(@actions)
 
-  @maps = %{
+  @maps  %{
     "4x4" => [
       "SFFF",
       "FHFH",
