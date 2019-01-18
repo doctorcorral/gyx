@@ -1,4 +1,4 @@
-defmodule Gyx.FrozenLake.Game do
+defmodule Gyx.FrozenLake.Environment do
   alias Gyx.Framework.Env
   @behaviour Env
   use GenServer
