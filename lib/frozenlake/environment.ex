@@ -29,6 +29,11 @@ defmodule Gyx.FrozenLake.Environment do
     ]
   }
 
+  @impl true
+  def init(map \\ "4x4") do
+    {:ok, %__MODULE__{map: map, x: 0, y: 0}}
+  end
+
   @impl Env
   def reset() do
     GenServer.call(__MODULE__, :reset)
