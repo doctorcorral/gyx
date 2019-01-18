@@ -28,4 +28,10 @@ defmodule Gyx.FrozenLake.Game do
       "FFFHFFFG"
     ]
   }
+
+  @impl true
+  def handle_call(:reset, _from, state) do
+    new_env_state = %{state | x: 0, y: 0}
+    {:reply, %Exp{}, new_env_state}
+  end
 end
