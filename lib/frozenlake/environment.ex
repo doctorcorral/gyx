@@ -29,6 +29,11 @@ defmodule Gyx.FrozenLake.Game do
     ]
   }
 
+  @impl Env
+  def reset() do
+    GenServer.call(__MODULE__, :reset)
+  end
+
   @impl true
   def handle_call(:reset, _from, state) do
     new_env_state = %{state | x: 0, y: 0}
