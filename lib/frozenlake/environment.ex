@@ -34,6 +34,10 @@ defmodule Gyx.FrozenLake.Environment do
     {:ok, %__MODULE__{map: @maps[map_name], row: 0, col: 0}}
   end
 
+  def start_link(_, opts) do
+    GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
+  end
+
   @impl Env
   def reset() do
     GenServer.call(__MODULE__, :reset)
