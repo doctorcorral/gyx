@@ -66,6 +66,16 @@ defmodule Gyx.FrozenLake.Environment do
     {:reply, new_env_state, new_env_state}
   end
 
+  def handle_call({:act, :right}, _from, state) do
+    new_env_state = %{state | col: min(state.col + 1, state.ncol - 1)}
+    {:reply, new_env_state, new_env_state}
+  end
+
+  def handle_call({:act, :up}, _from, state) do
+    new_env_state = %{state | row: max(state.row - 1, 0)}
+    {:reply, new_env_state, new_env_state}
+  end
+
   defp nrow(map), do: length(map)
   defp ncol([head | rest]), do: length(head)
 end
