@@ -38,6 +38,13 @@ defmodule Gyx.FrozenLake.Environment do
     GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
   end
 
+  def step(action) when action not in @action_space, do: {:reply, :error, "Invalid action"}
+
+  @impl true
+  def step(action) do
+    GenServer.call(__MODULE__, {:act, @actions[action]})
+  end
+
   @impl Env
   def reset() do
     GenServer.call(__MODULE__, :reset)
@@ -47,5 +54,10 @@ defmodule Gyx.FrozenLake.Environment do
   def handle_call(:reset, _from, state) do
     new_env_state = %{state | row: 0, col: 0}
     {:reply, %Exp{}, new_env_state}
+  end
+
+  def handle_call({:act, :left}, _from, state) do
+    new_env_state = %{state | col: max(state.col - 1, 0)}
+    {:reply, new_env_state, new_env_state}
   end
 end
