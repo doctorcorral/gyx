@@ -1,4 +1,10 @@
 defmodule Gyx.FrozenLake.Environment do
+  @moduledoc """
+  This module implements the FrozenLake-v0
+  environment according to
+  OpenAI implementation: https://gym.openai.com/envs/FrozenLake-v0/
+  """
+
   alias Gyx.Framework.Env
   @behaviour Env
   use GenServer
