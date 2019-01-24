@@ -77,7 +77,7 @@ defmodule Gyx.FrozenLake.Environment do
   end
 
   def handle_call(:render, _from, state) do
-    Enum.map(state.map, &printEnvLine(&1, state.col))
+    printEnv(state, 0, state.col)
     {:reply, {state.row, state.col}, state}
   end
 
@@ -110,16 +110,25 @@ defmodule Gyx.FrozenLake.Environment do
   defp nrow(map), do: length(map)
   defp ncol([head | rest]), do: length(head)
 
-  defp printEnvLine(string_line, agent_position \\ 0) do
+  defp printEnv([] , _, _), do: IO.puts("yeah")
+
+  defp printEnv([h | t] , row, col) do
+    printEnvLine(h, col, row == row)
+    printEnv(t, row+1, col)
+  end
+
+  defp printEnvLine(string_line, agent_position, mark \\ false) do
     chars_line = String.graphemes(string_line)
+    m = Enum.at(chars_line, agent_position)
+    case mark do
+      true -> m = IO.ANSI.format_fragment([:red, :bright, Enum.at(chars_line, agent_position)], true)
+    end
 
     p =
       IO.ANSI.format_fragment(
         [:blue, :bright, Enum.take(chars_line, agent_position) |> List.to_string()],
         true
       )
-
-    m = IO.ANSI.format_fragment([:red, :bright, Enum.at(chars_line, agent_position)], true)
 
     q =
       IO.ANSI.format_fragment(
