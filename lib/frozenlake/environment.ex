@@ -10,8 +10,15 @@ defmodule Gyx.FrozenLake.Environment do
   use GenServer
   alias Experience.Exp
 
-  defstruct map: nil, row: nil, col: nil
-  @type t :: %__MODULE__{map: list(charlist), row: integer, col: integer}
+  defstruct map: nil, row: nil, col: nil, ncol: nil, nrow: nil
+
+  @type t :: %__MODULE__{
+          map: list(charlist),
+          row: integer,
+          col: integer,
+          ncol: integer,
+          nrow: integer
+        }
 
   @actions %{0 => :left, 1 => :down, 2 => :right, 3 => :up}
   @action_space Map.keys(@actions)
@@ -37,11 +44,20 @@ defmodule Gyx.FrozenLake.Environment do
 
   @impl true
   def init(map_name \\ "4x4") do
-    {:ok, %__MODULE__{map: @maps[map_name], row: 0, col: 0}}
+    map = @maps[map_name]
+
+    {:ok,
+     %__MODULE__{
+       map: map,
+       row: 0,
+       col: 0,
+       nrow: length(map),
+       ncol: String.length(List.first(map))
+     }}
   end
 
   def start_link(_, opts) do
-    GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
+    GenServer.start_link(__MODULE__, "4x4", opts)
   end
 
   def step(action) when action not in @action_space, do: {:reply, :error, "Invalid action"}
@@ -54,6 +70,15 @@ defmodule Gyx.FrozenLake.Environment do
   @impl Env
   def reset() do
     GenServer.call(__MODULE__, :reset)
+  end
+
+  def render() do
+    GenServer.call(__MODULE__, :render)
+  end
+
+  def handle_call(:render, _from, state) do
+    Enum.map(state.map, &printEnvLine(&1))
+    {:reply, {state.row, state.col}, state}
   end
 
   @impl true
@@ -84,4 +109,11 @@ defmodule Gyx.FrozenLake.Environment do
 
   defp nrow(map), do: length(map)
   defp ncol([head | rest]), do: length(head)
+
+  defp printEnvLine(string_line, agent_position \\ 0) do
+    chars_line = String.graphemes(string_line)
+    p = Enum.take(chars_line, agent_position)
+    q = Enum.take(chars_line, -agent_position)
+    (p ++ IO.ANSI.format_fragment([:red, :bright], true)) |> IO.puts()
+  end
 end
