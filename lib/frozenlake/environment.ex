@@ -77,7 +77,7 @@ defmodule Gyx.FrozenLake.Environment do
   end
 
   def handle_call(:render, _from, state) do
-    printEnv(state, 0, state.col)
+    printEnv(state.map, state.row, state.col)
     {:reply, {state.row, state.col}, state}
   end
 
@@ -110,23 +110,24 @@ defmodule Gyx.FrozenLake.Environment do
   defp nrow(map), do: length(map)
   defp ncol([head | rest]), do: length(head)
 
-  defp printEnv([] , _, _), do: IO.puts("yeah")
+  defp printEnv([], _, _), do: IO.puts("yeah")
 
-  defp printEnv([h | t] , row, col) do
-    printEnvLine(h, col, row == row)
-    printEnv(t, row+1, col)
+  defp printEnv([h | t], row, col) do
+    printEnvLine(h, col, row == 0)
+    printEnv(t, row - 1, col)
   end
 
-  defp printEnvLine(string_line, agent_position, mark \\ false) do
+  defp printEnvLine(string_line, agent_position, mark) do
     chars_line = String.graphemes(string_line)
-    m = Enum.at(chars_line, agent_position)
-    case mark do
-      true -> m = IO.ANSI.format_fragment([:red, :bright, Enum.at(chars_line, agent_position)], true)
-    end
+
+    m =
+      if mark,
+        do: IO.ANSI.format_fragment([:red, :bright, Enum.at(chars_line, agent_position)], true),
+        else: Enum.at(chars_line, agent_position)
 
     p =
       IO.ANSI.format_fragment(
-        [:blue, :bright, Enum.take(chars_line, agent_position) |> List.to_string()],
+        [:green, :bright, Enum.take(chars_line, agent_position) |> List.to_string()],
         true
       )
 
