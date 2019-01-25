@@ -93,7 +93,7 @@ defmodule Gyx.FrozenLake.Environment do
   end
 
   def handle_call({:act, :down}, _from, state) do
-    new_env_state = %{state | row: min(state.row + 1, nrow(state.map) - 1)}
+    new_env_state = %{state | row: min(state.row + 1, state.nrow - 1)}
     {:reply, %Exp{}, new_env_state}
   end
 
@@ -106,9 +106,6 @@ defmodule Gyx.FrozenLake.Environment do
     new_env_state = %{state | row: max(state.row - 1, 0)}
     {:reply, %Exp{}, new_env_state}
   end
-
-  defp nrow(map), do: length(map)
-  defp ncol([head | rest]), do: length(head)
 
   defp printEnv([], _, _), do: IO.puts("yeah")
 
