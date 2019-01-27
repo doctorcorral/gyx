@@ -43,7 +43,7 @@ defmodule Gyx.FrozenLake.Environment do
   }
 
   @impl true
-  def init(map_name \\ "4x4") do
+  def init(map_name) do
     map = @maps[map_name]
 
     {:ok,
@@ -84,27 +84,22 @@ defmodule Gyx.FrozenLake.Environment do
   @impl true
   def handle_call(:reset, _from, state) do
     new_env_state = %{state | row: 0, col: 0}
+    {:reply, %Exp{next_state: new_env_state}, new_env_state}
+  end
+
+  def handle_call({:act, action}, _from, state) do
+    new_env_state = rwo_col_step(state, action)
     {:reply, %Exp{}, new_env_state}
   end
 
-  def handle_call({:act, :left}, _from, state) do
-    new_env_state = %{state | col: max(state.col - 1, 0)}
-    {:reply, %Exp{}, new_env_state}
-  end
-
-  def handle_call({:act, :down}, _from, state) do
-    new_env_state = %{state | row: min(state.row + 1, state.nrow - 1)}
-    {:reply, %Exp{}, new_env_state}
-  end
-
-  def handle_call({:act, :right}, _from, state) do
-    new_env_state = %{state | col: min(state.col + 1, state.ncol - 1)}
-    {:reply, %Exp{}, new_env_state}
-  end
-
-  def handle_call({:act, :up}, _from, state) do
-    new_env_state = %{state | row: max(state.row - 1, 0)}
-    {:reply, %Exp{}, new_env_state}
+  defp rwo_col_step(state, action) do
+    case action do
+      :left -> %{state | col: max(state.col - 1, 0)}
+      :down -> %{state | row: min(state.row + 1, state.nrow - 1)}
+      :right -> %{state | col: min(state.col + 1, state.ncol - 1)}
+      :up -> %{state | row: max(state.row - 1, 0)}
+      _ -> state
+    end
   end
 
   defp printEnv([], _, _), do: IO.puts("yeah")
@@ -120,7 +115,7 @@ defmodule Gyx.FrozenLake.Environment do
     m =
       if mark,
         do: IO.ANSI.format_fragment([:red, :bright, Enum.at(chars_line, agent_position)], true),
-        else: Enum.at(chars_line, agent_position)
+        else: [Enum.at(chars_line, agent_position)]
 
     p =
       IO.ANSI.format_fragment(
