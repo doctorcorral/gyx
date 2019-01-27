@@ -88,9 +88,24 @@ defmodule Gyx.FrozenLake.Environment do
   end
 
   def handle_call({:act, action}, _from, state) do
-    new_env_state = rwo_col_step(state, action)
-    {:reply, %Exp{}, new_env_state}
+    new_state = rwo_col_step(state, action)
+    current = get_position(new_state.map, new_state.row, new_state.col)
+    {:reply,
+     %Exp{
+       state: env_state_transformer(state),
+       action: action,
+       next_state: env_state_transformer(new_state),
+       reward: (if (current == "G"), do: 1.0, else: 0.0),
+       done: current in ["H", "G"],
+       info: %{}
+     }, new_state}
   end
+
+  defp get_position(map, row, col) do
+    Enum.at(String.graphemes(Enum.at(map, row)), col)
+  end
+
+  defp env_state_transformer(state), do: state
 
   defp rwo_col_step(state, action) do
     case action do
