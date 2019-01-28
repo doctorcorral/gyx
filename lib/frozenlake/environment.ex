@@ -78,7 +78,7 @@ defmodule Gyx.FrozenLake.Environment do
 
   def handle_call(:render, _from, state) do
     printEnv(state.map, state.row, state.col)
-    {:reply, {state.row, state.col}, state}
+    {:reply, {:ok, position: {state.row, state.col}}, state}
   end
 
   @impl true
@@ -90,12 +90,13 @@ defmodule Gyx.FrozenLake.Environment do
   def handle_call({:act, action}, _from, state) do
     new_state = rwo_col_step(state, action)
     current = get_position(new_state.map, new_state.row, new_state.col)
+
     {:reply,
      %Exp{
        state: env_state_transformer(state),
        action: action,
        next_state: env_state_transformer(new_state),
-       reward: (if (current == "G"), do: 1.0, else: 0.0),
+       reward: if(current == "G", do: 1.0, else: 0.0),
        done: current in ["H", "G"],
        info: %{}
      }, new_state}
@@ -117,7 +118,7 @@ defmodule Gyx.FrozenLake.Environment do
     end
   end
 
-  defp printEnv([], _, _), do: IO.puts("yeah")
+  defp printEnv([], _, _), do: :ok
 
   defp printEnv([h | t], row, col) do
     printEnvLine(h, col, row == 0)
@@ -129,12 +130,12 @@ defmodule Gyx.FrozenLake.Environment do
 
     m =
       if mark,
-        do: IO.ANSI.format_fragment([:red, :bright, Enum.at(chars_line, agent_position)], true),
+        do: IO.ANSI.format_fragment([:red, :italic, Enum.at(chars_line, agent_position)], true),
         else: [Enum.at(chars_line, agent_position)]
 
     p =
       IO.ANSI.format_fragment(
-        [:green, :bright, Enum.take(chars_line, agent_position) |> List.to_string()],
+        [:green, :italic, Enum.take(chars_line, agent_position) |> List.to_string()],
         true
       )
 
@@ -142,7 +143,7 @@ defmodule Gyx.FrozenLake.Environment do
       IO.ANSI.format_fragment(
         [
           :green,
-          :bright,
+          :italic,
           Enum.take(chars_line, agent_position - length(chars_line) + 1) |> List.to_string()
         ],
         true
