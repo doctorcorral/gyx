@@ -108,7 +108,7 @@ defmodule Gyx.FrozenLake.Environment do
 
   defp env_state_transformer(state), do: state
 
-  @spec rwo_col_step(%__MODULE__{}, atom) :: %__MODULE__{}
+  @spec rwo_col_step(__MODULE__.t, atom) :: __MODULE__.t
   defp rwo_col_step(state, action) do
     case action do
       :left -> %{state | col: max(state.col - 1, 0)}
