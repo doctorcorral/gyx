@@ -1,25 +1,21 @@
 defmodule Gyx.Blackjack.Game do
   alias Gyx.Framework.Env
-  @behaviour Env
+  use Env
   use GenServer
   alias Experience.Exp
 
-  @fields quote(
-            do: [
-              player: [],
-              dealer: [],
-            ]
-          )
-  defstruct Keyword.keys(@fields)
-  @type t() :: %__MODULE__{unquote_splicing(@fields)}
+  defstruct player: [], dealer: []
 
+  @type t :: %__MODULE__{
+    player: list,
+    dealer: list
+  }
 
   # card values
   @deck [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
   # STICK, HIT
   @action_space [0, 1]
 
-  @impl true
   def init(_) do
     {:ok, %__MODULE__{player: draw_hand(), dealer: draw_hand()}}
   end
@@ -28,12 +24,10 @@ defmodule Gyx.Blackjack.Game do
     GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
   end
 
-  @impl Env
   def reset() do
     GenServer.call(__MODULE__, :reset)
   end
 
-  @impl true
   def get_state() do
     GenServer.call(__MODULE__, :get_state)
   end
@@ -44,7 +38,6 @@ defmodule Gyx.Blackjack.Game do
 
   def step(action) when action not in @action_space, do: {:reply, :error, "Invalid action"}
 
-  @impl Env
   def step(action) do
     GenServer.call(__MODULE__, {:act, action})
   end

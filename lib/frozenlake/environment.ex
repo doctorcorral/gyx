@@ -6,7 +6,7 @@ defmodule Gyx.FrozenLake.Environment do
   """
 
   alias Gyx.Framework.Env
-  @behaviour Env
+  use Env
   use GenServer
   alias Experience.Exp
 
