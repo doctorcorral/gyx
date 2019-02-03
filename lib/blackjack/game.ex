@@ -16,6 +16,7 @@ defmodule Gyx.Blackjack.Game do
   # STICK, HIT
   @action_space [0, 1]
 
+  @impl true
   def init(_) do
     {:ok, %__MODULE__{player: draw_hand(), dealer: draw_hand()}}
   end

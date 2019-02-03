@@ -1,4 +1,11 @@
-defmodule Gyx.Qstorage.Qlocal do
+defmodule Gyx.Qstorage.QGenServer do
+  @moduledoc """
+  This module is intended to be used as a Q table representation.
+  It is based on a single GenServer process, using a Map to hold Q table data
+  as part of process state.
+  Note that this is a hand made version of an Agent OTP implementation,
+  which would be preferable that this.
+  """
   use GenServer
 
   defstruct state_value_table: %{}

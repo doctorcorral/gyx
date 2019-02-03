@@ -17,6 +17,13 @@ defmodule Gyx.Blackjack.IAgent do
     GenServer.call(__MODULE__, {:q_get, {env_state, action}})
   end
 
+  @doc """
+  Sets an state, action pair expected return value
+  ### Example
+
+    iex> Gyx.Qstorage.Qlocal.q_set(%{a: 1}, 1, 42)
+    %{"%{a: 1}" => %{1 => 42}}
+  """
   def q_set(env_state = %State{}, action, value) do
     GenServer.call(__MODULE__, {:q_set, {env_state, action, value}})
   end
