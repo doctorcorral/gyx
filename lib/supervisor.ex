@@ -15,7 +15,8 @@ defmodule Gyx.Supervisor do
       worker(Gyx.Blackjack.Game, [[], [name: Gyx.Blackjack.Game]]),
       worker(Gyx.FrozenLake.Environment, [[], [name: Gyx.FrozenLake.Environment]]),
       worker(Gyx.Blackjack.IAgent, [[], [name: Gyx.Blackjack.IAgent]]),
-      worker(Gyx.Blackjack.Trainer, [[], [name: Gyx.Blackjack.Trainer]])
+      worker(Gyx.Blackjack.Trainer, [[], [name: Gyx.Blackjack.Trainer]]),
+      worker(Gyx.Qstorage.Qlocal, [[], [name: Gyx.Qstorage.Qlocal]])
     ]
   end
 end

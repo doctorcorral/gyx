@@ -24,6 +24,10 @@ defmodule Gyx.Qstorage.Qlocal do
     GenServer.call(__MODULE__, :get_q)
   end
 
+  def act(env_state) do
+    GenServer.call(__MODULE__, {:get_action, env_state})
+  end
+
   def handle_call(:get_q, _from, state = %__MODULE__{}),
     do: {:reply, state.state_value_table, state}
 
@@ -32,7 +36,7 @@ defmodule Gyx.Qstorage.Qlocal do
         _from,
         state = %__MODULE__{}
       ) do
-    {:reply, state.state_value_table[inspect(env_state)][inspect(action)], state}
+    {:reply, state.state_value_table[inspect(env_state)][action], state}
   end
 
   def handle_call(
