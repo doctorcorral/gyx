@@ -1,4 +1,4 @@
-defmodule GyxTest do
+defmodule GyxQstorageTest do
   use ExUnit.Case
 
   setup do
