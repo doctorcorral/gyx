@@ -13,7 +13,7 @@ defmodule Gyx.Experience.Exp do
 
   Use `info` key to store any additional metadata that could be useful for a
   replay buffer to consider when sampling. For example, a timestamp that could
-  guarantee an atoic broadcasted replay buffer.
+  guarantee an atomic broadcasted replay buffer.
   """
   defstruct state: nil, action: nil, reward: 0, next_state: nil, done: false, info: %{}
 
