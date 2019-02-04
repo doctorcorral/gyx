@@ -2,7 +2,7 @@ defmodule Gyx.Blackjack.Game do
   alias Gyx.Framework.Env
   use Env
   use GenServer
-  alias Experience.Exp
+  alias Gyx.Experience.Exp
 
   defstruct player: [], dealer: []
 

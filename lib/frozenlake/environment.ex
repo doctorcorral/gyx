@@ -8,7 +8,7 @@ defmodule Gyx.FrozenLake.Environment do
   alias Gyx.Framework.Env
   use Env
   use GenServer
-  alias Experience.Exp
+  alias Gyx.Experience.Exp
 
   defstruct map: nil, row: nil, col: nil, ncol: nil, nrow: nil
 

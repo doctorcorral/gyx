@@ -1,5 +1,6 @@
 defmodule Gyx.Blackjack.Trainer do
   use GenServer
+  alias Gyx.Experience.Exp
 
   @enforce_keys [:environment, :agent]
   @fields quote(
@@ -54,7 +55,7 @@ defmodule Gyx.Blackjack.Trainer do
 
   defp run_episode(t = %__MODULE__{}, false) do
     action = t.agent.get_action(t.environment.get_state_abstraction())
-    exp = %Experience.Exp{done: done} = t.environment.step(action)
+    exp = %Exp{done: done} = t.environment.step(action)
     t = %{t | trajectory: [exp | t.trajectory]}
     IO.inspect(exp)
     IO.inspect(t.trajectory)
