@@ -25,10 +25,12 @@ defmodule Gyx.Blackjack.Game do
     GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
   end
 
+  @impl true
   def reset() do
     GenServer.call(__MODULE__, :reset)
   end
 
+  @impl true
   def get_state() do
     GenServer.call(__MODULE__, :get_state)
   end
@@ -37,6 +39,7 @@ defmodule Gyx.Blackjack.Game do
     GenServer.call(__MODULE__, :get_state_abstraction)
   end
 
+  @impl true
   def step(action) when action not in @action_space, do: {:reply, :error, "Invalid action"}
 
   def step(action) do
