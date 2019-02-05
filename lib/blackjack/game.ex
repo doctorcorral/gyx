@@ -3,7 +3,7 @@ defmodule Gyx.Blackjack.Game do
   use Env
   use GenServer
   alias Gyx.Experience.Exp
-
+  require Logger
   defstruct player: [], dealer: []
 
   @type t :: %__MODULE__{
@@ -44,12 +44,12 @@ defmodule Gyx.Blackjack.Game do
   end
 
   def handle_call(:get_state, _from, state = %__MODULE__{}) do
-    IO.inspect(state)
+    Logger.debug(inspect(state))
     {:reply, state, state}
   end
 
   def handle_call(:get_state_abstraction, _from, state = %__MODULE__{player: p, dealer: d}) do
-    IO.inspect(state)
+    Logger.debug(inspect(state))
     {:reply, %Gyx.Blackjack.State{player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}, state}
   end
 

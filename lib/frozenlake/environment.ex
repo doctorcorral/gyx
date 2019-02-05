@@ -108,7 +108,7 @@ defmodule Gyx.FrozenLake.Environment do
 
   defp env_state_transformer(state), do: state
 
-  @spec rwo_col_step(__MODULE__.t, atom) :: __MODULE__.t
+  @spec rwo_col_step(__MODULE__.t(), atom) :: __MODULE__.t()
   defp rwo_col_step(state, action) do
     case action do
       :left -> %{state | col: max(state.col - 1, 0)}
@@ -133,14 +133,14 @@ defmodule Gyx.FrozenLake.Environment do
       if mark,
         do:
           IO.ANSI.format_fragment(
-            [:light_magenta, :italic, Enum.at(chars_line, agent_position)],
+            [:light_magenta, :italic, chars_line |> Enum.at(agent_position)],
             true
           ),
         else: [Enum.at(chars_line, agent_position)]
 
     p =
       IO.ANSI.format_fragment(
-        [:light_blue, :italic, Enum.take(chars_line, agent_position) |> List.to_string()],
+        [:light_blue, :italic, chars_line |> Enum.take(agent_position) |> List.to_string()],
         true
       )
 
@@ -149,7 +149,7 @@ defmodule Gyx.FrozenLake.Environment do
         [
           :light_blue,
           :italic,
-          Enum.take(chars_line, agent_position - length(chars_line) + 1) |> List.to_string()
+          chars_line |> Enum.take(agent_position - length(chars_line) + 1) |> List.to_string()
         ],
         true
       )

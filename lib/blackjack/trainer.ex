@@ -1,12 +1,13 @@
 defmodule Gyx.Blackjack.Trainer do
   use GenServer
   alias Gyx.Experience.Exp
+  require Logger
 
   @enforce_keys [:environment, :agent]
   @fields quote(
             do: [
-              environment: Env.Blackjack.t,
-              agent: Agents.BlackjackAgent.t,
+              environment: Env.Blackjack.t(),
+              agent: Agents.BlackjackAgent.t(),
               trajectory: []
             ]
           )
@@ -42,7 +43,7 @@ defmodule Gyx.Blackjack.Trainer do
   defp trainer(t = %__MODULE__{}, 0), do: t
 
   defp trainer(t = %__MODULE__{}, num_episodes) do
-    IO.puts("\n*** Episodes remaining: " <> inspect(num_episodes))
+    Logger.info("\n*** Episodes remaining: " <> inspect(num_episodes))
     t.environment.reset()
     t = %{t | trajectory: []}
 
@@ -57,9 +58,8 @@ defmodule Gyx.Blackjack.Trainer do
     action = t.agent.get_action(t.environment.get_state_abstraction())
     exp = %Exp{done: done} = t.environment.step(action)
     t = %{t | trajectory: [exp | t.trajectory]}
-    IO.inspect(exp)
-    IO.inspect(t.trajectory)
+    Logger.debug(inspect(exp))
+    Logger.info(inspect(t.trajectory))
     run_episode(t, done)
   end
 end
-
