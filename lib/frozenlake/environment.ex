@@ -106,7 +106,7 @@ defmodule Gyx.FrozenLake.Environment do
     Enum.at(String.graphemes(Enum.at(map, row)), col)
   end
 
-  defp env_state_transformer(state), do: state
+  def env_state_transformer(state), do: Map.put(state, :enumerated, state.row * 4 + state.col)
 
   @spec rwo_col_step(__MODULE__.t(), atom) :: __MODULE__.t()
   defp rwo_col_step(state, action) do
