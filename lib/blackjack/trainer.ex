@@ -1,4 +1,8 @@
 defmodule Gyx.Blackjack.Trainer do
+  @moduledoc"""
+  This module describes an entire training process,
+  tune accordingly to your particular environment and agent
+  """
   use GenServer
   alias Gyx.Experience.Exp
   require Logger
