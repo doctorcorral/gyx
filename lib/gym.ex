@@ -17,5 +17,8 @@ defmodule Gyx.Gym do
     Helper.call_python(:gym_interface, :render, [environment])
   end
 
+  def reset(environment) do
+    Helper.call_python(:gym_interface, :reset, [environment])
+  end
 
 end
