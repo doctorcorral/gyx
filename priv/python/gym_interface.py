@@ -15,3 +15,6 @@ def step(env, _step):
 
 def render(env):
     env.render()
+
+def reset(env):
+    return env.reset()
