@@ -79,8 +79,8 @@ defmodule Gyx.Gym.Environment do
 
   @impl true
   def handle_call(:reset, _from, state) do
-    new_env_state = %__MODULE__{env: Helper.call_python(:gym_interface, :reset, [state.env])}
-    {:reply, %Exp{}, new_env_state}
+    {env, state} = Helper.call_python(:gym_interface, :reset, [state.env])
+    {:reply, %Exp{}, %__MODULE__{env: env, state: state}}
   end
 
   def handle_call(:render, _from, state) do
