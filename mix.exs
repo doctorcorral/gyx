@@ -26,7 +26,8 @@ defmodule Gyx.MixProject do
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
       {:earmark, "~> 1.2", only: :dev},
       {:ex_doc, "~> 0.19", only: :dev},
-      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
+      {:erlport, "~> 0.9"}
     ]
   end
 end
