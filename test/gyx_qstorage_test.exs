@@ -12,6 +12,6 @@ defmodule GyxQstorageTest do
   end
 
   test "Q table | get_action | GenSerer process" do
-    assert Gyx.Qstorage.QGenServer.act(%{a: 2}) == 2
+    assert Gyx.Qstorage.QGenServer.get_max_action(%{a: 2}) == 2
   end
 end
