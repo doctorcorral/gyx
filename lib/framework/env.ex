@@ -19,9 +19,8 @@ defmodule Gyx.Framework.Env do
   defmacro __using__(_params) do
     quote do
       @behaviour Gyx.Framework.Env
-      def get_state(), do: __MODULE__.__struct__
-      defoverridable [get_state: 0]
+      def get_state(), do: GenServer.call(__MODULE__, :get_state)
+      defoverridable get_state: 0
     end
   end
-
 end

@@ -46,7 +46,7 @@ defmodule Gyx.Gym.Environment do
     GenServer.call(__MODULE__, :reset)
   end
 
-  def handle_call({:make, environment_name}, _from, state) do
+  def handle_call({:make, environment_name}, _from, _state) do
     {env, initial_state} =
       Helper.call_python(
         :gym_interface,
@@ -54,7 +54,7 @@ defmodule Gyx.Gym.Environment do
         [environment_name]
       )
 
-    {:reply, initial_state, %{env: env, state: initial_state}}
+    {:reply, initial_state, %__MODULE__{env: env, state: initial_state}}
   end
 
   def handle_call({:act, action}, _from, state) do
@@ -87,4 +87,6 @@ defmodule Gyx.Gym.Environment do
     Helper.call_python(:gym_interface, :render, [state.env])
     {:reply, state.state, state}
   end
+
+  def handle_call(:get_state, _from, state), do: {:reply, state, state}
 end
