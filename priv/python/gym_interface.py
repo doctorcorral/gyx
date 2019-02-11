@@ -6,8 +6,8 @@ def make(envname):
     print("⏩ ⏩ ⏩ {0}".format(envname))
     print("🔥 🔥 🔥 😎")
     env = gym.make(en)
-    env.reset()
-    return env
+    initial_state = env.reset()
+    return (env, initial_state)
 
 def step(env, _step):
     observation = env.step(_step)
@@ -17,4 +17,5 @@ def render(env):
     env.render()
 
 def reset(env):
-    return env.reset()
+    initial_state = env.reset()
+    return (env, initial_state)
