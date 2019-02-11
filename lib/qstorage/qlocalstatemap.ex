@@ -31,8 +31,8 @@ defmodule Gyx.Qstorage.QGenServer do
     GenServer.call(__MODULE__, :get_q)
   end
 
-  def act(env_state) do
-    GenServer.call(__MODULE__, {:get_action, env_state})
+  def get_max_action(env_state) do
+    GenServer.call(__MODULE__, {:get_max_action, env_state})
   end
 
   def handle_call(:get_q, _from, state = %__MODULE__{}),
@@ -69,7 +69,7 @@ defmodule Gyx.Qstorage.QGenServer do
   end
 
   def handle_call(
-        {:get_action, env_state},
+        {:get_max_action, env_state},
         _from,
         state = %__MODULE__{}
       ) do
