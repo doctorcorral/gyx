@@ -16,4 +16,12 @@ defmodule Gyx.Agents.SARSA.Agent do
     GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
   end
 
+  def act_greedy(observation) do
+    GenServer.call(__MODULE__, {:act_greedy, observation})
+  end
+
+  def handle_call({:act_greedy, observation}, _from, %{Q: Q} =state) do
+    Q.get_max_action(observation)
+  end
+
 end
