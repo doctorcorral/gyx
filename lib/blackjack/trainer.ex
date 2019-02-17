@@ -56,8 +56,10 @@ defmodule Gyx.Blackjack.Trainer do
   defp run_episode(t = %__MODULE__{}, true), do: t
 
   defp run_episode(t = %__MODULE__{}, false) do
-    action = t.agent.get_max_action(t.environment.get_state())
-    exp = %Exp{done: done} = t.environment.step(action)
+    exp = %Exp{done: done} =
+      t.environment.get_state()
+      |> t.agent.get_max_action()
+      |> t.environment.step
     t = %{t | trajectory: [exp | t.trajectory]}
     run_episode(t, done)
   end
