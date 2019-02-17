@@ -5,10 +5,12 @@ defmodule Gyx.Agents.SARSA.Agent do
           Q: any()
         }
 
+  alias Gyx.Qstorage.QGenServer
+
   def init(_) do
     {:ok,
       %__MODULE__{
-        Q: Gyx.Qstorage.QGenServer,
+        Q: QGenServer,
       }}
   end
 
@@ -20,7 +22,7 @@ defmodule Gyx.Agents.SARSA.Agent do
     GenServer.call(__MODULE__, {:act_greedy, observation})
   end
 
-  def handle_call({:act_greedy, observation}, _from, %{Q: Q} =state) do
+  def handle_call({:act_greedy, observation}, _from, %{Q: Q}) do
     Q.get_max_action(observation)
   end
 
