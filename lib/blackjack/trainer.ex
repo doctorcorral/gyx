@@ -1,5 +1,5 @@
 defmodule Gyx.Blackjack.Trainer do
-  @moduledoc"""
+  @moduledoc """
   This module describes an entire training process,
   tune accordingly to your particular environment and agent
   """
@@ -8,17 +8,14 @@ defmodule Gyx.Blackjack.Trainer do
   require Logger
 
   @enforce_keys [:environment, :agent]
-  @fields quote(
-            do: [
-              environment: Env.Blackjack.t(),
-              agent: Agents.BlackjackAgent.t(),
-              trajectory: []
-            ]
-          )
 
-  defstruct Keyword.keys(@fields)
+  defstruct environment: nil, agent: nil, trajectory: nil
 
-  @type t() :: %__MODULE__{unquote_splicing(@fields)}
+  @type t :: %__MODULE__{
+          environment: any(),
+          agent: any(),
+          trajectory: list(Exp)
+        }
 
   @env_module Gyx.Blackjack.Game
   @agent Gyx.Blackjack.IAgent
@@ -26,8 +23,8 @@ defmodule Gyx.Blackjack.Trainer do
   def init(_) do
     {:ok,
      %Gyx.Blackjack.Trainer{
-       environment: Gyx.Blackjack.Game,
-       agent: Gyx.Blackjack.IAgent,
+       environment: Gyx.Gym.Environment,
+       agent: Gyx.Qstorage.QGenServer,
        trajectory: []
      }}
   end
@@ -41,7 +38,7 @@ defmodule Gyx.Blackjack.Trainer do
   end
 
   def handle_call(:train, _from, t = %__MODULE__{}) do
-    {:reply, trainer(t, 13), t}
+    {:reply, trainer(t, 3), t}
   end
 
   defp trainer(t = %__MODULE__{}, 0), do: t
@@ -59,11 +56,9 @@ defmodule Gyx.Blackjack.Trainer do
   defp run_episode(t = %__MODULE__{}, true), do: t
 
   defp run_episode(t = %__MODULE__{}, false) do
-    action = t.agent.get_action(t.environment.get_state_abstraction())
+    action = t.agent.get_max_action(t.environment.get_state())
     exp = %Exp{done: done} = t.environment.step(action)
     t = %{t | trajectory: [exp | t.trajectory]}
-    Logger.debug(inspect(exp))
-    Logger.info(inspect(t.trajectory))
     run_episode(t, done)
   end
 end
