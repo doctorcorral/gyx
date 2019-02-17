@@ -18,7 +18,7 @@ defmodule Gyx.Python.Helper do
   """
   def call_python_pid(pid, module, function, arguments \\ []) do
     pid
-    |>:python.call(module, function, arguments)
+    |> :python.call(module, function, arguments)
   end
 
   def call_python(module, function, args \\ []) do
@@ -27,9 +27,10 @@ defmodule Gyx.Python.Helper do
   end
 
   defp default_instance() do
-    path = [:code.priv_dir(:gyx), "python"]
-          |> Path.join()
+    path =
+      [:code.priv_dir(:gyx), "python"]
+      |> Path.join()
+
     python_instance(to_charlist(path))
   end
-
 end
