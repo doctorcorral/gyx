@@ -18,13 +18,13 @@ defmodule Gyx.Blackjack.Trainer do
         }
 
   @env_module Gyx.Blackjack.Game
-  @agent Gyx.Blackjack.IAgent
+  @agent Gyx.Agents.SARSA.Agent
 
   def init(_) do
     {:ok,
      %Gyx.Blackjack.Trainer{
        environment: Gyx.Gym.Environment,
-       agent: Gyx.Qstorage.QGenServer,
+       agent: Gyx.Agents.SARSA.Agent,
        trajectory: []
      }}
   end
@@ -57,13 +57,13 @@ defmodule Gyx.Blackjack.Trainer do
 
   defp run_episode(t = %__MODULE__{}, false) do
     exp =
-      %Exp{done: done,
-      state: s, action: a, reward: r, next_state: ss} =
+      %Exp{done: done, state: s, action: a, reward: r, next_state: ss} =
       t.environment.get_state()
-      |> t.agent.get_max_action()
+      |> t.agent.act_greedy()
       |> t.environment.step
 
-    ss = t.agent.get_max_action(SS)
+    aa = t.agent.act_greedy(ss)
+    t.agent.td_learn({s, a, r, ss, aa})
     t = %{t | trajectory: [exp | t.trajectory]}
     run_episode(t, done)
   end
