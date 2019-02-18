@@ -43,7 +43,8 @@ defmodule Gyx.Qstorage.QGenServer do
         _from,
         state = %__MODULE__{}
       ) do
-    {:reply, state.state_value_table[inspect(env_state)][action], state}
+    expected_reward = state.state_value_table[inspect(env_state)][action]
+    {:reply, if(expected_reward, do: expected_reward, else: 0.0), state}
   end
 
   def handle_call(
