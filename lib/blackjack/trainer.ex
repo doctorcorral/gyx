@@ -17,20 +17,20 @@ defmodule Gyx.Blackjack.Trainer do
           trajectory: list(Exp)
         }
 
-  @env_module Gyx.Blackjack.Game
+  @env_module Gyx.Gym.Environment
   @agent Gyx.Agents.SARSA.Agent
 
   def init(_) do
     {:ok,
      %Gyx.Blackjack.Trainer{
-       environment: Gyx.Gym.Environment,
-       agent: Gyx.Agents.SARSA.Agent,
+       environment: @env_module,
+       agent: @agent,
        trajectory: []
      }}
   end
 
   def start_link(_, opts) do
-    GenServer.start_link(__MODULE__, %{env: @env_module, agent: @agent}, opts)
+    GenServer.start_link(__MODULE__, [], opts)
   end
 
   def train() do
@@ -38,7 +38,7 @@ defmodule Gyx.Blackjack.Trainer do
   end
 
   def handle_call(:train, _from, t = %__MODULE__{}) do
-    {:reply, trainer(t, 3), t}
+    {:reply, trainer(t, 13), t}
   end
 
   defp trainer(t = %__MODULE__{}, 0), do: t
@@ -58,11 +58,11 @@ defmodule Gyx.Blackjack.Trainer do
   defp run_episode(t = %__MODULE__{}, false) do
     exp =
       %Exp{done: done, state: s, action: a, reward: r, next_state: ss} =
-      t.environment.get_state()
+      t.environment.observe()
       |> t.agent.act_epsilon_greedy()
       |> t.environment.step
 
-    aa = t.agent.act_greedy(ss)
+    aa = t.agent.act_epsilon_greedy(ss)
     t.agent.td_learn({s, a, r, ss, aa})
     t = %{t | trajectory: [exp | t.trajectory]}
     run_episode(t, done)

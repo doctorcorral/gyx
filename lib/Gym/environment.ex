@@ -96,4 +96,6 @@ defmodule Gyx.Gym.Environment do
   end
 
   def handle_call(:get_state, _from, state), do: {:reply, state, state}
+
+  def handle_call(:observe, _from, state), do: {:reply, state.state, state}
 end
