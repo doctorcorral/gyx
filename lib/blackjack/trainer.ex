@@ -59,7 +59,7 @@ defmodule Gyx.Blackjack.Trainer do
     exp =
       %Exp{done: done, state: s, action: a, reward: r, next_state: ss} =
       t.environment.get_state()
-      |> t.agent.act_greedy()
+      |> t.agent.act_epsilon_greedy()
       |> t.environment.step
 
     aa = t.agent.act_greedy(ss)
