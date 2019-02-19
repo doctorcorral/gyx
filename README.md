@@ -12,7 +12,7 @@ Initial abstractions are already stablished, so higher level programs like train
 ### Solve Blackjack with SARSA
 Environments in `Gyx` can be implemented by using [`Env`](https://github.com/doctorcorral/gyx/blob/master/lib/framework/env.ex) behaviour.
 
-A wrapper environment module for calling OpenAI Gym environments can be found in [`Gyx.Gym.Environment`](https://github.com/doctorcorral/gyx/blob/master/lib/Gym/environment.ex)
+A wrapper environment module for calling [OpenAI Gym](https://gym.openai.com/) environments can be found in [`Gyx.Gym.Environment`](https://github.com/doctorcorral/gyx/blob/master/lib/Gym/environment.ex)
 
 For a Gym environment to be used, it is necessary to initialize the `Gyx` process to a particular environment by calling `make/1`
 
@@ -28,9 +28,9 @@ Now it is possible to run a training session with
 iex(2)> Gyx.Trainers.TrainerSarsa.train
 ```
 
-Here, `Gyx.Trainers.TrainerSarsa.train` is already configured to use environment `Gyx.Gym.Environment` and agent `Gyx.Agents.SARSA.Agent` wich in turn, is configured to use `Gyx.Qstorage.QGenServer` as a Q table storeage module.
+Here, `Gyx.Trainers.TrainerSarsa.train` is already configured to use environment `Gyx.Gym.Environment` and agent `Gyx.Agents.SARSA.Agent` wich in turn, is configured to use `Gyx.Qstorage.QGenServer` as a *Q* table storage module.
 
-After finishing the training, optimal Q values can be seen with 
+After finishing the training, optimal *Q* values can be seen with 
 
 ```Elixir
 iex(3)> Gyx.Qstorage.QGenServer.get_q
