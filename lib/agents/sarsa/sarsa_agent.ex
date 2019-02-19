@@ -43,10 +43,9 @@ defmodule Gyx.Agents.SARSA.Agent do
   def handle_call({:act_epsilon_greedy, observation, epsilon},
                   _from,
                   %{Q: qtable} = state) do
-    {:reply, if(:rand.uniform(10)/10.0 < epsilon,
+    {:reply, if(:rand.uniform() < epsilon,
                 do: qtable.get_max_action(observation),
                 else:  Enum.random([0, 1])), state}
-
   end
 
   def handle_call({:act_greedy, observation}, _from, %{Q: qtable} = state) do
