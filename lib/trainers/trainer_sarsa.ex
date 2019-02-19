@@ -59,6 +59,7 @@ defmodule Gyx.Trainers.TrainerSarsa do
     exp =
       %Exp{done: done, state: s, action: a, reward: r, next_state: ss} =
       t.environment.observe()
+      t.environment.render()
       |> t.agent.act_epsilon_greedy()
       |> t.environment.step
 
