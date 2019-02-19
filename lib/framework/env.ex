@@ -20,6 +20,7 @@ defmodule Gyx.Framework.Env do
     quote do
       @behaviour Gyx.Framework.Env
       def get_state(), do: GenServer.call(__MODULE__, :get_state)
+      def observe(), do: GenServer.call(__MODULE__, :observe)
       defoverridable get_state: 0
     end
   end
