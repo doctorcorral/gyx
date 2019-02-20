@@ -12,6 +12,8 @@ Initial abstractions are already stablished, so higher level programs like train
 ### Solve Blackjack with [SARSA](https://en.wikipedia.org/wiki/State%E2%80%93action%E2%80%93reward%E2%80%93state%E2%80%93action)
 Environments in `Gyx` can be implemented by using [`Env`](https://github.com/doctorcorral/gyx/blob/master/lib/framework/env.ex) behaviour.
 
+> NOTE: Gym library must be installed. You can follow install instructions depicted in [DRLND](https://github.com/udacity/deep-reinforcement-learning#dependencies) repo, then activate the Python environment with `soure activate drlnd`.
+
 A wrapper environment module for calling [OpenAI Gym](https://gym.openai.com/) environments can be found in [`Gyx.Gym.Environment`](https://github.com/doctorcorral/gyx/blob/master/lib/Gym/environment.ex)
 
 For a Gym environment to be used, it is necessary to initialize the `Gyx` process to a particular environment by calling `make/1`
