@@ -9,11 +9,11 @@ defmodule Gyx.Gym.Environment do
   use GenServer
   alias Gyx.Experience.Exp
   require Logger
-  defstruct env: nil, state: nil, session: nil
+  defstruct env: nil, current_state: nil, session: nil
 
   @type t :: %__MODULE__{
           env: any(),
-          state: any(),
+          current_state: any(),
           session: any()
         }
 
@@ -22,10 +22,10 @@ defmodule Gyx.Gym.Environment do
     python_session = HelperAsync.start()
     Logger.warn("Gym environment not associated yet with current #{__MODULE__} process")
     Logger.info("In order to assign a Gym environment to this process,
-    please use #{__MODULE__}.make(ENVIRONMENTNAME)")
+    please use #{__MODULE__}.make(ENVIRONMENTNAME)\n")
     HelperAsync.call(python_session, :test, :register_handler, [self()])
 
-    {:ok, %__MODULE__{env: nil, state: nil, session: python_session}}
+    {:ok, %__MODULE__{env: nil, current_state: nil, session: python_session}}
   end
 
   def start_link(_, opts) do
@@ -59,7 +59,7 @@ defmodule Gyx.Gym.Environment do
         [environment_name]
       )
 
-    {:reply, initial_state, %__MODULE__{env: env, state: initial_state, session: state.session}}
+    {:reply, initial_state, %__MODULE__{env: env, current_state: initial_state, session: state.session}}
   end
 
   def handle_call({:act, action}, _from, state) do
@@ -72,7 +72,7 @@ defmodule Gyx.Gym.Environment do
       )
 
     experience = %Exp{
-      state: state.state,
+      state: state.current_state,
       action: action,
       next_state: gym_state,
       reward: reward,
@@ -80,22 +80,21 @@ defmodule Gyx.Gym.Environment do
       info: %{gym_info: info}
     }
 
-    {:reply, experience, %__MODULE__{env: next_env, state: gym_state, session: state.session}}
+    {:reply, experience, %__MODULE__{env: next_env, current_state: gym_state, session: state.session}}
   end
 
   @impl true
   def handle_call(:reset, _from, state) do
     {env, initial_state} = HelperAsync.call(state.session, :gym_interface, :reset, [state.env])
-    #{:reply, %Exp{}, %__MODULE__{env: env, state: state, session: state.session}}
-    {:reply, %Exp{}, %{state | env: env, state: initial_state}}
+    {:reply, %Exp{}, %{state | env: env, current_state: initial_state}}
   end
 
   def handle_call(:render, _from, state) do
     HelperAsync.call(state.session, :gym_interface, :render, [state.env])
-    {:reply, state.state, state}
+    {:reply, state.current_state, state}
   end
 
   def handle_call(:get_state, _from, state), do: {:reply, state, state}
 
-  def handle_call(:observe, _from, state), do: {:reply, state.state, state}
+  def handle_call(:observe, _from, state), do: {:reply, state.current_state, state}
 end
