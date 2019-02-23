@@ -9,12 +9,13 @@ defmodule Gyx.Trainers.TrainerSarsa do
 
   @enforce_keys [:environment, :agent]
 
-  defstruct environment: nil, agent: nil, trajectory: nil
+  defstruct environment: nil, agent: nil, trajectory: nil, rewards: nil
 
   @type t :: %__MODULE__{
           environment: any(),
           agent: any(),
-          trajectory: list(Exp)
+          trajectory: list(Exp),
+          rewards: list(number())
         }
 
   @env_module Gyx.Gym.Environment
@@ -25,7 +26,8 @@ defmodule Gyx.Trainers.TrainerSarsa do
      %__MODULE__{
        environment: @env_module,
        agent: @agent,
-       trajectory: []
+       trajectory: [],
+       rewards: []
      }}
   end
 
@@ -38,28 +40,30 @@ defmodule Gyx.Trainers.TrainerSarsa do
   end
 
   def handle_call(:train, _from, t = %__MODULE__{}) do
-    {:reply, trainer(t, 13), t}
+    {:reply, trainer(t, 100000), t}
   end
 
-  defp trainer(t = %__MODULE__{}, 0), do: t
+  @spec trainer(__MODULE__.t(), integer) :: __MODULE__.t()
+  defp trainer(t, 0), do: t
 
-  defp trainer(t = %__MODULE__{}, num_episodes) do
-    Logger.info("\n*** Episodes remaining: " <> inspect(num_episodes))
+  defp trainer(t, num_episodes) do
+    # Logger.info("\n*** Episodes remaining: " <> inspect(num_episodes))
     t.environment.reset()
     t = %{t | trajectory: []}
 
     t
     |> run_episode(false)
+    |> log_stats()
     |> trainer(num_episodes - 1)
   end
 
   defp run_episode(t = %__MODULE__{}, true), do: t
 
   defp run_episode(t = %__MODULE__{}, false) do
+    # t.environment.render()
     exp =
       %Exp{done: done, state: s, action: a, reward: r, next_state: ss} =
       t.environment.observe()
-      t.environment.render()
       |> t.agent.act_epsilon_greedy()
       |> t.environment.step
 
@@ -67,5 +71,14 @@ defmodule Gyx.Trainers.TrainerSarsa do
     t.agent.td_learn({s, a, r, ss, aa})
     t = %{t | trajectory: [exp | t.trajectory]}
     run_episode(t, done)
+  end
+
+  defp log_stats(t) do
+    reward_sum = Enum.map(t.trajectory, & &1.reward) |> Enum.sum()
+    #Logger.info(inspect(reward_sum))
+    t = %{t | rewards: [reward_sum | t.rewards]}
+    k=1000
+    Logger.info(inspect((t.rewards |> Enum.take(k)|> Enum.sum())/k))
+    t
   end
 end
