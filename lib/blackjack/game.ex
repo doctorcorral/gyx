@@ -7,9 +7,9 @@ defmodule Gyx.Blackjack.Game do
   defstruct player: [], dealer: []
 
   @type t :: %__MODULE__{
-    player: list,
-    dealer: list
-  }
+          player: list,
+          dealer: list
+        }
 
   # card values
   @deck [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
@@ -30,11 +30,6 @@ defmodule Gyx.Blackjack.Game do
     GenServer.call(__MODULE__, :reset)
   end
 
-  @impl true
-  def get_state() do
-    GenServer.call(__MODULE__, :get_state)
-  end
-
   def get_state_abstraction() do
     GenServer.call(__MODULE__, :get_state_abstraction)
   end
@@ -47,7 +42,6 @@ defmodule Gyx.Blackjack.Game do
   end
 
   def handle_call(:get_state, _from, state = %__MODULE__{}) do
-    Logger.debug(inspect(state))
     {:reply, state, state}
   end
 
