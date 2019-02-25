@@ -4,7 +4,7 @@ defmodule Gyx.Trainers.TrainerSarsa do
   tune accordingly to your particular environment and agent
   """
   use GenServer
-  alias Gyx.Experience.Exp
+  alias Gyx.Core.Exp
   require Logger
 
   @enforce_keys [:environment, :agent]
