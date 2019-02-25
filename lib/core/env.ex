@@ -21,7 +21,7 @@ defmodule Gyx.Core.Env do
   informing the agent back with a reward, a modified environment
   and a termination signal
   """
-  @callback step(any()) :: Gyx.Experience.Exp.t()
+  @callback step(any()) :: Gyx.Core.Exp.t()
 
   @doc "Retrieves the parameters for current environment state"
   @callback get_state() :: any()
