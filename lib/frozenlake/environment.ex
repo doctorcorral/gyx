@@ -5,10 +5,9 @@ defmodule Gyx.FrozenLake.Environment do
   OpenAI implementation: https://gym.openai.com/envs/FrozenLake-v0/
   """
 
-  alias Gyx.Framework.Env
+  alias Gyx.Core.{Env, Exp}
   use Env
   use GenServer
-  alias Gyx.Experience.Exp
 
   defstruct map: nil, row: nil, col: nil, ncol: nil, nrow: nil
 

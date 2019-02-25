@@ -4,10 +4,9 @@ defmodule Gyx.Gym.Environment do
   Python OpenAI Gym methods
   """
   alias Gyx.Python.HelperAsync
-  alias Gyx.Framework.Env
+  alias Gyx.Core.{Env, Exp}
   use Env
   use GenServer
-  alias Gyx.Experience.Exp
   require Logger
   defstruct env: nil, current_state: nil, session: nil
 
@@ -59,7 +58,8 @@ defmodule Gyx.Gym.Environment do
         [environment_name]
       )
 
-    {:reply, initial_state, %__MODULE__{env: env, current_state: initial_state, session: state.session}}
+    {:reply, initial_state,
+     %__MODULE__{env: env, current_state: initial_state, session: state.session}}
   end
 
   def handle_call({:act, action}, _from, state) do
@@ -80,7 +80,8 @@ defmodule Gyx.Gym.Environment do
       info: %{gym_info: info}
     }
 
-    {:reply, experience, %__MODULE__{env: next_env, current_state: gym_state, session: state.session}}
+    {:reply, experience,
+     %__MODULE__{env: next_env, current_state: gym_state, session: state.session}}
   end
 
   @impl true
