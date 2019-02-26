@@ -1,0 +1,28 @@
+{
+  "files": ["README.md"],
+  "imageSize": 100,
+  "contributorsPerLine": 7,
+  "badgeTemplate": "[![All Contributors](https://img.shields.io/badge/all_contributors-<%= contributors.length %>-orange.svg?style=flat-square)](#contributors)",
+  "contributorTemplate": "<%= avatarBlock %><br /><%= contributions %>",
+  "types": {
+    "custom": {
+      "symbol": "🖼",
+      "description": "Artistic contribution",
+      "link": "[<%= symbol %>](<%= url %> \"<%= description %>\"),"
+    }
+  },
+  "contributors": [
+          {
+      "login": "erneestoc",
+      "name": "Ernesto Cambuston",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/1932403?s=460&v=4",
+      "profile": "https://github.com/erneestoc",
+      "contributions": [
+        "question",
+        "review",
+        "talk",
+        "code"
+      ]
+}
+  ]
+}
