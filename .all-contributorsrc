@@ -21,7 +21,8 @@
         "question",
         "review",
         "talk",
-        "code"
+        "code",
+        "test"
       ]
 },
           {
@@ -34,6 +35,7 @@
         "review",
         "talk",
         "code",
+        "content",
         "mantainer"
       ]
 }
