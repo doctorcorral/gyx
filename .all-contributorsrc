@@ -23,6 +23,18 @@
         "talk",
         "code"
       ]
+},
+          {
+      "login": "doctorcorral",
+      "name": "Ricardo Corral-Corral",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/8988577?s=460&v=4",
+      "profile": "https://github.com/doctorcorral",
+      "contributions": [
+        "question",
+        "review",
+        "talk",
+        "code"
+      ]
 }
   ]
 }
