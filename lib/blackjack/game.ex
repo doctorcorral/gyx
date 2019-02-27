@@ -3,7 +3,7 @@ defmodule Gyx.Blackjack.Game do
   use Env
   use GenServer
   require Logger
-  defstruct player: [], dealer: []
+  defstruct player: [], dealer: [], action_space: %Gyx.Core.Spaces.Discrete{n: 2}
 
   @type t :: %__MODULE__{
           player: list,

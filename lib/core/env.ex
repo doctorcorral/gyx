@@ -12,6 +12,7 @@ defmodule Gyx.Core.Env do
   Should it be a way to obtain an evironment state abstraction as suposed to be shown
   to an agent? i.e. an indirect observation.
   """
+
   @doc "Sets the state of the environment to its default"
   @callback reset() :: any()
   @doc "Gets an environment representation usable by the agent"
@@ -28,7 +29,10 @@ defmodule Gyx.Core.Env do
 
   defmacro __using__(_params) do
     quote do
-      @behaviour Gyx.Framework.Env
+      @behaviour Gyx.Core.Env
+
+      @enforce_keys [:action_space]
+
       def get_state(), do: GenServer.call(__MODULE__, :get_state)
       def observe(), do: GenServer.call(__MODULE__, :observe)
       defoverridable get_state: 0

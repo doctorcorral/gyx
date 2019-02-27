@@ -8,12 +8,13 @@ defmodule Gyx.Gym.Environment do
   use Env
   use GenServer
   require Logger
-  defstruct env: nil, current_state: nil, session: nil
+  defstruct env: nil, current_state: nil, session: nil, action_space: nil
 
   @type t :: %__MODULE__{
           env: any(),
           current_state: any(),
-          session: any()
+          session: any(),
+          action_space: any()
         }
 
   @impl true
@@ -24,7 +25,10 @@ defmodule Gyx.Gym.Environment do
     please use #{__MODULE__}.make(ENVIRONMENTNAME)\n")
     HelperAsync.call(python_session, :test, :register_handler, [self()])
 
-    {:ok, %__MODULE__{env: nil, current_state: nil, session: python_session}}
+    {:ok, %__MODULE__{env: nil,
+                      current_state: nil,
+                      session: python_session,
+                      action_space: nil}}
   end
 
   def start_link(_, opts) do
