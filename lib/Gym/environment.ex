@@ -25,14 +25,11 @@ defmodule Gyx.Gym.Environment do
     please use #{__MODULE__}.make(ENVIRONMENTNAME)\n")
     HelperAsync.call(python_session, :test, :register_handler, [self()])
 
-    {:ok, %__MODULE__{env: nil,
-                      current_state: nil,
-                      session: python_session,
-                      action_space: nil}}
+    {:ok, %__MODULE__{env: nil, current_state: nil, session: python_session, action_space: nil}}
   end
 
   def start_link(_, opts) do
-    GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
+    GenServer.start_link(__MODULE__, %__MODULE__{action_space: nil}, opts)
   end
 
   def render() do
@@ -63,7 +60,12 @@ defmodule Gyx.Gym.Environment do
       )
 
     {:reply, initial_state,
-     %__MODULE__{env: env, current_state: initial_state, session: state.session}}
+     %__MODULE__{
+       env: env,
+       current_state: initial_state,
+       session: state.session,
+       action_space: %Gyx.Core.Spaces.Discrete{n: 2}
+     }}
   end
 
   def handle_call({:act, action}, _from, state) do
@@ -84,8 +86,7 @@ defmodule Gyx.Gym.Environment do
       info: %{gym_info: info}
     }
 
-    {:reply, experience,
-     %__MODULE__{env: next_env, current_state: gym_state, session: state.session}}
+    {:reply, experience, %{state | env: next_env, current_state: gym_state}}
   end
 
   @impl true

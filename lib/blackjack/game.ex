@@ -3,11 +3,12 @@ defmodule Gyx.Blackjack.Game do
   use Env
   use GenServer
   require Logger
-  defstruct player: [], dealer: [], action_space: %Gyx.Core.Spaces.Discrete{n: 2}
+  defstruct player: [], dealer: [], action_space: nil
 
   @type t :: %__MODULE__{
           player: list,
-          dealer: list
+          dealer: list,
+          action_space: any
         }
 
   # card values
@@ -16,12 +17,12 @@ defmodule Gyx.Blackjack.Game do
   @action_space [0, 1]
 
   @impl true
-  def init(_) do
-    {:ok, %__MODULE__{player: draw_hand(), dealer: draw_hand()}}
+  def init(action_space) do
+    {:ok, %__MODULE__{player: draw_hand(), dealer: draw_hand(), action_space: action_space}}
   end
 
   def start_link(_, opts) do
-    GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
+    GenServer.start_link(__MODULE__, %Gyx.Core.Spaces.Discrete{n: 2}, opts)
   end
 
   @impl true
@@ -99,7 +100,12 @@ defmodule Gyx.Blackjack.Game do
 
   @impl true
   def handle_call(:reset, _from, _state) do
-    new_env_state = %__MODULE__{player: draw_hand(), dealer: draw_hand()}
+    new_env_state = %__MODULE__{
+      player: draw_hand(),
+      dealer: draw_hand(),
+      action_space: %Gyx.Core.Spaces.Discrete{n: 2}
+    }
+
     {:reply, %Exp{}, new_env_state}
   end
 
