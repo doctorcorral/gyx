@@ -9,14 +9,15 @@ defmodule Gyx.FrozenLake.Environment do
   use Env
   use GenServer
 
-  defstruct map: nil, row: nil, col: nil, ncol: nil, nrow: nil
+  defstruct map: nil, row: nil, col: nil, ncol: nil, nrow: nil, action_space: nil
 
   @type t :: %__MODULE__{
           map: list(charlist),
           row: integer,
           col: integer,
           ncol: integer,
-          nrow: integer
+          nrow: integer,
+          action_space: any
         }
 
   @actions %{0 => :left, 1 => :down, 2 => :right, 3 => :up}
@@ -51,7 +52,8 @@ defmodule Gyx.FrozenLake.Environment do
        row: 0,
        col: 0,
        nrow: length(map),
-       ncol: String.length(List.first(map))
+       ncol: String.length(List.first(map)),
+       action_space: %Gyx.Core.Spaces.Discrete{n: 4}
      }}
   end
 
