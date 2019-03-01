@@ -14,7 +14,7 @@ defmodule Gyx.Gym.Utils do
     gym_space_string |> parse |> create_space
   end
 
-  def parse(gym_space_string) do
+  defp parse(gym_space_string) do
     {regex, type} =
       Enum.find(@space_types, {nil, :unknown}, fn {regex, _} ->
         Regex.match?(regex, Kernel.inspect(gym_space_string))

@@ -5,7 +5,7 @@ defmodule Gyx.Gym.Environment do
   """
   alias Gyx.Python.HelperAsync
   alias Gyx.Core.{Env, Exp}
-  alias Gyx.Gym.Utils
+  import Gyx.Gym.Utils, only: [gyx_space: 1]
   use Env
   use GenServer
   require Logger
@@ -65,7 +65,7 @@ defmodule Gyx.Gym.Environment do
        env: env,
        current_state: initial_state,
        session: state.session,
-       action_space: Utils.gyx_space(action_space)
+       action_space: gyx_space(action_space)
      }}
   end
 
