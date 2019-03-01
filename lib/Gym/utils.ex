@@ -17,10 +17,10 @@ defmodule Gyx.Gym.Utils do
   defp parse(gym_space_string) do
     {regex, type} =
       Enum.find(@space_types, {nil, :unknown}, fn {regex, _} ->
-        Regex.match?(regex, gym_space_string)
+        Regex.match?(regex, to_string(gym_space_string))
       end)
 
-    {type, Regex.named_captures(regex, gym_space_string)}
+    {type, Regex.named_captures(regex, to_string(gym_space_string))}
   end
 
   defp create_space({:discrete, capture}),
