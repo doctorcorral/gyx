@@ -1,4 +1,4 @@
-defmodule Gyx.Gym.Spaces.Test do
+defmodule Gyx.Gym.UtilsTest do
   use ExUnit.Case
 
   test "Discrete" do
