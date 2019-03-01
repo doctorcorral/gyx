@@ -23,6 +23,8 @@ defmodule Gyx.Gym.Utils do
     {type, Regex.named_captures(regex, Kernel.inspect(gym_space_string))}
   end
 
-  defp create_space({:discrete, capture}), do: %Gyx.Core.Spaces.Discrete{n: capture["n"]}
+  defp create_space({:discrete, capture}),
+    do: %Gyx.Core.Spaces.Discrete{n: String.to_integer(Map.get(capture, "n"))}
+
   defp create_space({:unknown, nil}), do: %{}
 end
