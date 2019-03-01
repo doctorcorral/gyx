@@ -1,4 +1,4 @@
-defmodule Gyx.Python.HelperAsync do
+defmodule Gyx.Helpers.Python do
   @doc """
    Start python instance with custom modules dir priv/python
   """

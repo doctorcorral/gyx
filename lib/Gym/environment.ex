@@ -3,7 +3,7 @@ defmodule Gyx.Gym.Environment do
   This module is an API for accessing
   Python OpenAI Gym methods
   """
-  alias Gyx.Python.HelperAsync
+  alias Gyx.Helpers.Python
   alias Gyx.Core.{Env, Exp}
   import Gyx.Gym.Utils, only: [gyx_space: 1]
   use Env
@@ -20,11 +20,11 @@ defmodule Gyx.Gym.Environment do
 
   @impl true
   def init(_) do
-    python_session = HelperAsync.start()
+    python_session = Python.start()
     Logger.warn("Gym environment not associated yet with current #{__MODULE__} process")
     Logger.info("In order to assign a Gym environment to this process,
     please use #{__MODULE__}.make(ENVIRONMENTNAME)\n")
-    HelperAsync.call(python_session, :test, :register_handler, [self()])
+    Python.call(python_session, :test, :register_handler, [self()])
 
     {:ok, %__MODULE__{env: nil, current_state: nil, session: python_session, action_space: nil}}
   end
@@ -53,7 +53,7 @@ defmodule Gyx.Gym.Environment do
 
   def handle_call({:make, environment_name}, _from, state) do
     {env, initial_state, action_space} =
-      HelperAsync.call(
+      Python.call(
         state.session,
         :gym_interface,
         :make,
@@ -71,7 +71,7 @@ defmodule Gyx.Gym.Environment do
 
   def handle_call({:act, action}, _from, state) do
     {next_env, {gym_state, reward, done, info}} =
-      HelperAsync.call(
+      Python.call(
         state.session,
         :gym_interface,
         :step,
@@ -93,14 +93,14 @@ defmodule Gyx.Gym.Environment do
   @impl true
   def handle_call(:reset, _from, state) do
     {env, initial_state, action_space} =
-      HelperAsync.call(state.session, :gym_interface, :reset, [state.env])
+      Python.call(state.session, :gym_interface, :reset, [state.env])
 
     {:reply, %Exp{},
      %{state | env: env, current_state: initial_state, action_space: action_space}}
   end
 
   def handle_call(:render, _from, state) do
-    HelperAsync.call(state.session, :gym_interface, :render, [state.env])
+    Python.call(state.session, :gym_interface, :render, [state.env])
     {:reply, state.current_state, state}
   end
 
