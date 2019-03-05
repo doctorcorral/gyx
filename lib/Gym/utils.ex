@@ -4,7 +4,8 @@ defmodule Gyx.Gym.Utils do
   compatibility with Gym, including functions to obtain
   Gyx space representations from Gym space specs.
   """
-  @space_types [{~r/Discrete\((?<n>\d+)\)/, :discrete}]
+  @space_types [{~r/Discrete\((?<n>\d+)\)/, :discrete},
+                {~r/Box\((?<shape>((\d)+,)+)\)/, :box}]
 
   @doc """
   This function takes the __repr__ response from Gym spaces
@@ -25,6 +26,17 @@ defmodule Gyx.Gym.Utils do
 
   defp create_space({:discrete, capture}),
     do: %Gyx.Core.Spaces.Discrete{n: String.to_integer(Map.get(capture, "n"))}
+
+  defp create_space({:box, capture}) do
+    shape =
+      Map.get(capture, "shape")
+      |> String.trim(",")
+      |> String.split(",")
+      |> Enum.map(&String.to_integer(&1))
+      |> List.to_tuple()
+
+    %Gyx.Core.Spaces.Box{shape: shape}
+  end
 
   defp create_space({:unknown, nil}), do: %{}
 end
