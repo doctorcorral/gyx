@@ -7,6 +7,7 @@ defmodule Gyx.Agents.SARSA.Agent do
         }
 
   alias Gyx.Qstorage.QGenServer
+  alias Gyx.Core.Spaces
 
   def init(_) do
     {:ok,
@@ -24,8 +25,8 @@ defmodule Gyx.Agents.SARSA.Agent do
     GenServer.call(__MODULE__, {:act_greedy, observation})
   end
 
-  def act_epsilon_greedy(observation, epsilon \\ 0.9) do
-    GenServer.call(__MODULE__, {:act_epsilon_greedy, observation, epsilon})
+  def act_epsilon_greedy(environment, epsilon \\ 0.9) do
+    GenServer.call(__MODULE__, {:act_epsilon_greedy, environment, epsilon})
   end
 
   def td_learn(sarsa) do
@@ -40,12 +41,12 @@ defmodule Gyx.Agents.SARSA.Agent do
     {:reply, expected_return, state}
   end
 
-  def handle_call({:act_epsilon_greedy, observation, epsilon},
+  def handle_call({:act_epsilon_greedy, environment_state, epsilon},
                   _from,
                   %{Q: qtable} = state) do
     {:reply, if(:rand.uniform() < epsilon,
-                do: qtable.get_max_action(observation),
-                else:  Enum.random([0, 1])), state}
+                do: qtable.get_max_action(environment_state.observation),
+                else:  with {:ok, action} <- Spaces.sample(environment_state.action_space) do action end), state}
   end
 
   def handle_call({:act_greedy, observation}, _from, %{Q: qtable} = state) do

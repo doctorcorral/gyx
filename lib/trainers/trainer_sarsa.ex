@@ -40,7 +40,7 @@ defmodule Gyx.Trainers.TrainerSarsa do
   end
 
   def handle_call(:train, _from, t = %__MODULE__{}) do
-    {:reply, trainer(t, 100000), t}
+    {:reply, trainer(t, 10000), t}
   end
 
   @spec trainer(__MODULE__.t(), integer) :: __MODULE__.t()
@@ -63,11 +63,12 @@ defmodule Gyx.Trainers.TrainerSarsa do
     # t.environment.render()
     exp =
       %Exp{done: done, state: s, action: a, reward: r, next_state: ss} =
-      t.environment.observe()
+        %{observation: t.environment.observe(), action_space: t.environment.get_state().action_space}
       |> t.agent.act_epsilon_greedy()
       |> t.environment.step
 
-    aa = t.agent.act_epsilon_greedy(ss)
+    aa = t.agent.act_epsilon_greedy(%{observation: ss, action_space: t.environment.get_state().action_space}
+    )
     t.agent.td_learn({s, a, r, ss, aa})
     t = %{t | trajectory: [exp | t.trajectory]}
     run_episode(t, done)
@@ -75,7 +76,6 @@ defmodule Gyx.Trainers.TrainerSarsa do
 
   defp log_stats(t) do
     reward_sum = Enum.map(t.trajectory, & &1.reward) |> Enum.sum()
-    #Logger.info(inspect(reward_sum))
     t = %{t | rewards: [reward_sum | t.rewards]}
     k=1000
     Logger.info(inspect((t.rewards |> Enum.take(k)|> Enum.sum())/k))
