@@ -29,7 +29,8 @@ defmodule Gyx.Gym.Utils do
 
   defp create_space({:box, capture}) do
     shape =
-      Map.get(capture, "shape")
+      capture
+      |> Map.get("shape")
       |> String.trim(",")
       |> String.split(",")
       |> Enum.map(&String.to_integer(&1))
