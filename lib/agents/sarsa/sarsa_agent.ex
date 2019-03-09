@@ -21,19 +21,19 @@ defmodule Gyx.Agents.SARSA.Agent do
     GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
   end
 
-  def act_greedy(observation) do
-    GenServer.call(__MODULE__, {:act_greedy, observation})
+  def act_greedy(environment_state) do
+    GenServer.call(__MODULE__, {:act_greedy, environment_state})
   end
 
-  def act_epsilon_greedy(environment, epsilon \\ 0.9) do
-    GenServer.call(__MODULE__, {:act_epsilon_greedy, environment, epsilon})
+  def act_epsilon_greedy(environment_state, epsilon \\ 0.9) do
+    GenServer.call(__MODULE__, {:act_epsilon_greedy, environment_state, epsilon})
   end
 
   def td_learn(sarsa) do
     GenServer.call(__MODULE__, {:td_learn, sarsa})
   end
 
-  def handle_call({:td_learn, {s, a, r, ss, aa}}, _from, %{Q: qtable, lr_rate: lr_rate} = state) do
+  def handle_call({:td_learn, {s, a, r, ss, aa}}, _from, state = %{Q: qtable, lr_rate: lr_rate}) do
     predict = qtable.q_get(s, a)
     target = r + 0.01 * qtable.q_get(ss, aa)
     expected_return = predict + lr_rate * (target - predict)
@@ -41,16 +41,22 @@ defmodule Gyx.Agents.SARSA.Agent do
     {:reply, expected_return, state}
   end
 
-  def handle_call({:act_epsilon_greedy, environment_state, epsilon},
-                  _from,
-                  %{Q: qtable} = state) do
-    {:reply, if(:rand.uniform() < epsilon,
-                do: qtable.get_max_action(environment_state.observation),
-                else:  with {:ok, action} <- Spaces.sample(environment_state.action_space) do action end), state}
+  def handle_call(
+        {:act_epsilon_greedy, environment_state, epsilon},
+        _from,
+        %{Q: qtable} = state
+      ) do
+    {:reply,
+     if(:rand.uniform() < epsilon,
+       do: qtable.get_max_action(environment_state.observation),
+       else:
+         with {:ok, action} <- Spaces.sample(environment_state.action_space) do
+           action
+         end
+     ), state}
   end
 
-  def handle_call({:act_greedy, observation}, _from, %{Q: qtable} = state) do
-    {:reply, qtable.get_max_action(observation), state}
+  def handle_call({:act_greedy, environment_state}, _from, state = %{Q: qtable}) do
+    {:reply, qtable.get_max_action(environment_state.observation), state}
   end
-
 end
