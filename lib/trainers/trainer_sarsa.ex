@@ -47,11 +47,10 @@ defmodule Gyx.Trainers.TrainerSarsa do
   defp trainer(t, 0), do: t
 
   defp trainer(t, num_episodes) do
-    # Logger.info("\n*** Episodes remaining: " <> inspect(num_episodes))
     t.environment.reset()
-    t = %{t | trajectory: []}
 
     t
+    |> initialize_trajectory()
     |> run_episode(false)
     |> log_stats()
     |> trainer(num_episodes - 1)
@@ -60,25 +59,33 @@ defmodule Gyx.Trainers.TrainerSarsa do
   defp run_episode(t = %__MODULE__{}, true), do: t
 
   defp run_episode(t = %__MODULE__{}, false) do
-    # t.environment.render()
     exp =
       %Exp{done: done, state: s, action: a, reward: r, next_state: ss} =
-        %{observation: t.environment.observe(), action_space: t.environment.get_state().action_space}
+      %{
+        observation: t.environment.observe(),
+        action_space: t.environment.get_state().action_space
+      }
       |> t.agent.act_epsilon_greedy()
       |> t.environment.step
 
-    aa = t.agent.act_epsilon_greedy(%{observation: ss, action_space: t.environment.get_state().action_space}
-    )
+    aa =
+      t.agent.act_epsilon_greedy(%{
+        observation: ss,
+        action_space: t.environment.get_state().action_space
+      })
+
     t.agent.td_learn({s, a, r, ss, aa})
     t = %{t | trajectory: [exp | t.trajectory]}
     run_episode(t, done)
   end
 
+  defp initialize_trajectory(t), do: %{t | trajectory: []}
+
   defp log_stats(t) do
     reward_sum = Enum.map(t.trajectory, & &1.reward) |> Enum.sum()
     t = %{t | rewards: [reward_sum | t.rewards]}
-    k=1000
-    Logger.info(inspect((t.rewards |> Enum.take(k)|> Enum.sum())/k))
+    k = 100
+    Logger.info("Reward: " <> to_string((t.rewards |> Enum.take(k) |> Enum.sum()) / k))
     t
   end
 end
