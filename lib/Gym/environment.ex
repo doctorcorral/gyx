@@ -96,7 +96,7 @@ defmodule Gyx.Gym.Environment do
       Python.call(state.session, :gym_interface, :reset, [state.env])
 
     {:reply, %Exp{},
-     %{state | env: env, current_state: initial_state, action_space: action_space}}
+     %{state | env: env, current_state: initial_state, action_space: gyx_space(action_space)}}
   end
 
   def handle_call(:render, _from, state) do
