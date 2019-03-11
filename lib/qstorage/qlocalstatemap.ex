@@ -85,9 +85,9 @@ defmodule Gyx.Qstorage.QGenServer do
            state.state_value_table[k_state]
            |> Enum.sort_by(fn {_, v} -> v end, &>=/2)
            |> Enum.take(1) do
-      {:reply, action, state}
+      {:reply, {:ok, action} , state}
     else
-      _ -> {:reply, Enum.random([0, 1]), state}
+      _ -> {:reply, {:error, "Environment state has not been observed."}, state}
     end
   end
 end
