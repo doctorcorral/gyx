@@ -25,7 +25,7 @@ defmodule Gyx.Agents.SARSA.Agent do
     GenServer.call(__MODULE__, {:act_greedy, environment_state})
   end
 
-  def act_epsilon_greedy(environment_state, epsilon \\ 0.9) do
+  def act_epsilon_greedy(environment_state, epsilon \\ 0.2) do
     GenServer.call(__MODULE__, {:act_epsilon_greedy, environment_state, epsilon})
   end
 
@@ -46,14 +46,21 @@ defmodule Gyx.Agents.SARSA.Agent do
         _from,
         %{Q: qtable} = state
       ) do
-    {:reply,
-     if(:rand.uniform() < epsilon,
-       do: qtable.get_max_action(environment_state.observation),
-       else:
-         with {:ok, action} <- Spaces.sample(environment_state.action_space) do
-           action
-         end
-     ), state}
+    {:ok, random_action} = Spaces.sample(environment_state.action_space)
+
+    max_action =
+      case qtable.get_max_action(environment_state.observation) do
+        {:ok, action} -> action
+        {:error, _} -> random_action
+      end
+
+    final_action =
+      case :rand.uniform() < 1 - epsilon do
+        true -> max_action
+        false -> random_action
+      end
+
+    {:reply, final_action, state}
   end
 
   def handle_call({:act_greedy, environment_state}, _from, state = %{Q: qtable}) do
