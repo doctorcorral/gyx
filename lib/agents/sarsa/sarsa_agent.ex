@@ -1,10 +1,12 @@
 defmodule Gyx.Agents.SARSA.Agent do
-  defstruct Q: nil, learning_rate: nil, gamma: nil
+  defstruct Q: nil, learning_rate: nil, gamma: nil, epsilon: nil, epsilon_min: nil
 
   @type t :: %__MODULE__{
           Q: any(),
           learning_rate: float(),
-          gamma: float()
+          gamma: float(),
+          epsilon: float(),
+          epsilon_min: float()
         }
 
   alias Gyx.Qstorage.QGenServer
@@ -14,8 +16,10 @@ defmodule Gyx.Agents.SARSA.Agent do
     {:ok,
      %__MODULE__{
        Q: QGenServer,
-       learning_rate: 0.81,
-       gamma: 0.9
+       learning_rate: 0.8,
+       gamma: 0.9,
+       epsilon: 0.8,
+       epsilon_min: 0.1
      }}
   end
 
@@ -27,8 +31,8 @@ defmodule Gyx.Agents.SARSA.Agent do
     GenServer.call(__MODULE__, {:act_greedy, environment_state})
   end
 
-  def act_epsilon_greedy(environment_state, epsilon \\ 0.2) do
-    GenServer.call(__MODULE__, {:act_epsilon_greedy, environment_state, epsilon})
+  def act_epsilon_greedy(environment_state) do
+    GenServer.call(__MODULE__, {:act_epsilon_greedy, environment_state})
   end
 
   def td_learn(sarsa) do
@@ -48,9 +52,9 @@ defmodule Gyx.Agents.SARSA.Agent do
   end
 
   def handle_call(
-        {:act_epsilon_greedy, environment_state, epsilon},
+        {:act_epsilon_greedy, environment_state},
         _from,
-        %{Q: qtable} = state
+        state = %{Q: qtable, epsilon: epsilon}
       ) do
     {:ok, random_action} = Spaces.sample(environment_state.action_space)
 
