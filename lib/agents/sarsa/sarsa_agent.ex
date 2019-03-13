@@ -1,9 +1,10 @@
 defmodule Gyx.Agents.SARSA.Agent do
-  defstruct Q: nil, lr_rate: nil
+  defstruct Q: nil, learning_rate: nil, gamma: nil
 
   @type t :: %__MODULE__{
           Q: any(),
-          lr_rate: Float.t()
+          learning_rate: float(),
+          gamma: float()
         }
 
   alias Gyx.Qstorage.QGenServer
@@ -13,7 +14,8 @@ defmodule Gyx.Agents.SARSA.Agent do
     {:ok,
      %__MODULE__{
        Q: QGenServer,
-       lr_rate: 0.81
+       learning_rate: 0.81,
+       gamma: 0.9
      }}
   end
 
@@ -33,10 +35,14 @@ defmodule Gyx.Agents.SARSA.Agent do
     GenServer.call(__MODULE__, {:td_learn, sarsa})
   end
 
-  def handle_call({:td_learn, {s, a, r, ss, aa}}, _from, state = %{Q: qtable, lr_rate: lr_rate}) do
+  def handle_call(
+        {:td_learn, {s, a, r, ss, aa}},
+        _from,
+        state = %{Q: qtable, learning_rate: learning_rate, gamma: gamma}
+      ) do
     predict = qtable.q_get(s, a)
-    target = r + 0.01 * qtable.q_get(ss, aa)
-    expected_return = predict + lr_rate * (target - predict)
+    target = r + gamma * qtable.q_get(ss, aa)
+    expected_return = predict + learning_rate * (target - predict)
     qtable.q_set(s, a, expected_return)
     {:reply, expected_return, state}
   end
