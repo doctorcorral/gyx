@@ -1,4 +1,4 @@
-defmodule Gyx.FrozenLake.Environment do
+defmodule Gyx.Environments.FrozenLake do
   @moduledoc """
   This module implements the FrozenLake-v0
   environment according to
