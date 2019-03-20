@@ -2,13 +2,13 @@ defmodule Gyx.Experience.ReplayBuffer do
   use GenServer
   alias Gyx.Core.Exp
 
-  def start_link do
-    GenServer.start_link(__MODULE__, %{})
+  def start_link(_, ops) do
+    GenServer.start_link(__MODULE__, %{}, ops)
   end
 
-  def init(state) do
-    :ets.new(:replay_buffer, [:duplicate_bag, :protected, :named_table])
-    {:ok, state}
+  def init(_) do
+    experiences = :ets.new(:replay_buffer, [:set, :protected, :named_table])
+    {:ok, experiences}
   end
 
   def delete(key) do
@@ -20,18 +20,23 @@ defmodule Gyx.Experience.ReplayBuffer do
   end
 
   def add(exp = %Exp{}) do
-    GenServer.cast(__MODULE__, {:add, exp})
+    GenServer.call(__MODULE__, {:add, exp})
   end
 
-  def handle_cast({:add, exp}, state) do
-    {:ok, timestamp_key} = DateTime.now("Etc/UTC")
-    :ets.insert(:replay_buffer, {timestamp_key, exp})
-    {:noreply, state}
+  @spec get_batch(integer()) :: list(Exp.t())
+  def get_batch(n) do
+    GenServer.call(__MODULE__, {:get_batch, n})
   end
 
   def handle_cast({:delete, key}, state) do
     :ets.delete(:replay_buffer, key)
     {:noreply, state}
+  end
+
+  def handle_call({:add, exp}, _from, state) do
+    {:ok, timestamp_key} = DateTime.now("Etc/UTC")
+    :ets.insert(:replay_buffer, {timestamp_key, exp})
+    {:reply, timestamp_key, state}
   end
 
   def handle_call({:get, key}, _from, state) do
@@ -44,4 +49,8 @@ defmodule Gyx.Experience.ReplayBuffer do
     {:reply, reply, state}
   end
 
+  def handle_call({:get_batch, _n}, _from, state) do
+    reply = :ets.match(:replay_buffer, {:_, "$2"})
+    {:reply, reply, state}
+  end
 end
