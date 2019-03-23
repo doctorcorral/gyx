@@ -1,6 +1,12 @@
-defmodule Gyx.Experience.ReplayBuffer do
+defmodule Gyx.Experience.ReplayBufferETS do
+  @moduledoc """
+  Implements ReplayMemory behaviour relying on ETS
+  """
+  alias Gyx.Core.ReplayMemory
   use GenServer
-  alias Gyx.Core.Exp
+  use ReplayMemory
+
+  @compile {:parse_transform, :ms_transform}
 
   def start_link(_, ops) do
     GenServer.start_link(__MODULE__, %{}, ops)
@@ -19,13 +25,16 @@ defmodule Gyx.Experience.ReplayBuffer do
     GenServer.call(__MODULE__, {:get, key})
   end
 
-  def add(exp = %Exp{}) do
-    GenServer.call(__MODULE__, {:add, exp})
+  @doc """
+  Adds a new experience to the reppay buffer
+  """
+  @spec add(Gyx.Core.Exp.t()) :: any()
+  def add(experience) do
+    GenServer.call(__MODULE__, {:add, experience})
   end
 
-  @spec get_batch(integer()) :: list(Exp.t())
-  def get_batch(n) do
-    GenServer.call(__MODULE__, {:get_batch, n})
+  def get_batch({n, sampling_strategy}) do
+    GenServer.call(__MODULE__, {:get_batch, {n, sampling_strategy}})
   end
 
   def handle_cast({:delete, key}, state) do
@@ -49,8 +58,9 @@ defmodule Gyx.Experience.ReplayBuffer do
     {:reply, reply, state}
   end
 
-  def handle_call({:get_batch, _n}, _from, state) do
-    reply = :ets.match(:replay_buffer, {:_, "$2"})
+  def handle_call({:get_batch, {_n, :random}}, _from, state) do
+    fun = :ets.fun2ms(fn {_k, v} -> v end)
+    reply = :ets.select(:replay_buffer, fun)
     {:reply, reply, state}
   end
 end
