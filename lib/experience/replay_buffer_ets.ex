@@ -13,7 +13,7 @@ defmodule Gyx.Experience.ReplayBufferETS do
   end
 
   def init(_) do
-    experiences = :ets.new(:replay_buffer, [:set, :protected, :named_table])
+    experiences = :ets.new(:replay_buffer, [:ordered_set, :protected, :named_table])
     {:ok, experiences}
   end
 
@@ -35,6 +35,13 @@ defmodule Gyx.Experience.ReplayBufferETS do
 
   def get_batch({n, sampling_strategy}) do
     GenServer.call(__MODULE__, {:get_batch, {n, sampling_strategy}})
+  end
+
+  def delete(), do: GenServer.cast(__MODULE__, :delete)
+
+  def handle_cast(:delete, state) do
+    :ets.delete(:replay_buffer)
+    {:noreply, state}
   end
 
   def handle_cast({:delete, key}, state) do
@@ -59,14 +66,24 @@ defmodule Gyx.Experience.ReplayBufferETS do
   end
 
   def handle_call({:get_batch, {n, :random}}, _from, state) do
-    fun = :ets.fun2ms(fn {_k, v} -> v end)
-
     reply =
       :replay_buffer
-      |> :ets.select(fun)
+      |> :ets.select(all_match_specification())
       |> Enum.shuffle()
       |> Enum.take(n)
 
     {:reply, reply, state}
   end
+
+  def handle_call({:get_batch, {n, :latest}}, _from, state) do
+    reply =
+      :replay_buffer
+      |> :ets.select(all_match_specification())
+      |> Enum.sort_by(fn {d, _exp} -> {d.year, d.month, d.day, d.second, d.microsecond} end)
+      |> Enum.take(-n)
+
+    {:reply, reply, state}
+  end
+
+  defp all_match_specification, do: :ets.fun2ms(fn {k, v} -> {k, v} end)
 end
