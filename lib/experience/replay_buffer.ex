@@ -58,9 +58,15 @@ defmodule Gyx.Experience.ReplayBufferETS do
     {:reply, reply, state}
   end
 
-  def handle_call({:get_batch, {_n, :random}}, _from, state) do
+  def handle_call({:get_batch, {n, :random}}, _from, state) do
     fun = :ets.fun2ms(fn {_k, v} -> v end)
-    reply = :ets.select(:replay_buffer, fun)
+
+    reply =
+      :replay_buffer
+      |> :ets.select(fun)
+      |> Enum.shuffle()
+      |> Enum.take(n)
+
     {:reply, reply, state}
   end
 end
