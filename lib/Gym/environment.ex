@@ -24,7 +24,6 @@ defmodule Gyx.Gym.Environment do
     Logger.warn("Gym environment not associated yet with current #{__MODULE__} process")
     Logger.info("In order to assign a Gym environment to this process,
     please use #{__MODULE__}.make(ENVIRONMENTNAME)\n")
-    Python.call(python_session, :test, :register_handler, [self()])
 
     {:ok, %__MODULE__{env: nil, current_state: nil, session: python_session, action_space: nil}}
   end

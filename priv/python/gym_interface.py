@@ -14,8 +14,8 @@ def make(envname):
 
 
 def step(env, _step):
-    observation = env.step(_step)
-    return (env, observation)
+    state, reward, done, info = env.step(_step)
+    return (env, (state, float(reward), done, info))
 
 
 def render(env):

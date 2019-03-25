@@ -1,4 +1,4 @@
-defmodule Gyx.Qstorage.QGenServer do
+defmodule Gyx.Qstorage.QGenServerTest do
   use ExUnit.Case
 
   setup do
