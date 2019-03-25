@@ -9,11 +9,12 @@ defmodule Gyx.Core.ReplayMemory do
   """
   @type experience :: Gyx.Core.Exp.t()
   @type experiences :: list(experience)
-  @type sampling_type :: atom()
+  @type sampling_type :: :random | :latest
+  @type batch_size :: integer()
 
-  @callback add(experience()) :: any()
+  @callback add(experience()) :: :ok
 
-  @callback get_batch({integer(), sampling_type()}) :: experiences()
+  @callback get_batch({batch_size(), sampling_type()}) :: experiences()
 
   defmacro __using__(_params) do
     quote do
