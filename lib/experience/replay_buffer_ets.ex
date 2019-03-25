@@ -28,9 +28,8 @@ defmodule Gyx.Experience.ReplayBufferETS do
   @doc """
   Adds a new experience to the reppay buffer
   """
-  @spec add(Gyx.Core.Exp.t()) :: any()
   def add(experience) do
-    GenServer.call(__MODULE__, {:add, experience})
+    GenServer.cast(__MODULE__, {:add, experience})
   end
 
   def get_batch({n, sampling_strategy}) do
@@ -49,10 +48,10 @@ defmodule Gyx.Experience.ReplayBufferETS do
     {:noreply, state}
   end
 
-  def handle_call({:add, exp}, _from, state) do
+  def handle_cast({:add, exp}, _state) do
     {:ok, timestamp_key} = DateTime.now("Etc/UTC")
     :ets.insert(:replay_buffer, {timestamp_key, exp})
-    {:reply, timestamp_key, state}
+    {:noreply, timestamp_key}
   end
 
   def handle_call({:get, key}, _from, state) do
