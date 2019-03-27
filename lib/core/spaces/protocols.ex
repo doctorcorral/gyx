@@ -3,6 +3,11 @@ defprotocol Gyx.Core.Spaces do
   This protocol defines basic functions to interact with
   action and observation spaces.
   """
+  alias Gyx.Core.Spaces.{Discrete, Box}
+
+  @type space :: Discrete.t() | Box.t()
+  @type discete_point :: integer()
+  @type box_point :: list(float())
 
   @doc """
   Samples a random point from a space.
@@ -34,7 +39,11 @@ defprotocol Gyx.Core.Spaces do
       iex> Gyx.Core.Spaces.sample(%Gyx.Core.Spaces.Box{shape: {2}, high: 7}
       {:ok, [[3.173570417347619, 0.286615818442874]]}
   """
+  @spec sample(space()) :: any()
   def sample(space)
+
+  @spec contains(space(), discete_point()) :: bool()
+  def contains(space, discete_point)
 
   @doc """
   Sets the random generator used by `sample/1` with the
@@ -47,6 +56,10 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Discrete do
   def sample(discrete_space) do
     {:ok, :rand.uniform(discrete_space.n) - 1}
   end
+
+  def contains(discrete_space, discrete_point) do
+    discrete_point in 0..(discrete_space.n - 1)
+  end
 end
 
 defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
@@ -58,6 +71,8 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
 
     {:ok, random_action}
   end
+
+  def contains(_), do: true
 
   defp get_rands(n, box_space) do
     Enum.map(1..n, fn _ -> :rand.uniform() * (box_space.high - box_space.low) + box_space.low end)
