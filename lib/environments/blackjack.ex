@@ -1,9 +1,9 @@
-defmodule Gyx.Blackjack.Game do
+defmodule Gyx.Environments.Blackjack do
   alias Gyx.Core.{Env, Exp}
   use Env
   use GenServer
   require Logger
-  defstruct player: [], dealer: [], action_space: nil
+  defstruct player: [], dealer: [], player_sum: nil, dealer_sum: nil, action_space: nil
 
   @type t :: %__MODULE__{
           player: list,
@@ -47,7 +47,7 @@ defmodule Gyx.Blackjack.Game do
 
   def handle_call(:get_state_abstraction, _from, state = %__MODULE__{player: p, dealer: d}) do
     Logger.debug(inspect(state))
-    {:reply, %Gyx.Blackjack.State{player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}, state}
+    {:reply, %{state | player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}, state}
   end
 
   def handle_call({:act, action = 0}, _from, state = %__MODULE__{}) do
@@ -109,8 +109,8 @@ defmodule Gyx.Blackjack.Game do
     {:reply, %Exp{}, new_env_state}
   end
 
-  defp env_state_transformer(%__MODULE__{player: p, dealer: d}) do
-    %Gyx.Blackjack.State{player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}
+  defp env_state_transformer(state = %__MODULE__{player: p, dealer: d}) do
+    %{state | player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}
   end
 
   defp draw_card(), do: @deck |> Enum.random()
