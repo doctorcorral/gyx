@@ -3,12 +3,13 @@ defmodule Gyx.Environments.Blackjack do
   use Env
   use GenServer
   require Logger
-  defstruct player: [], dealer: [], player_sum: nil, dealer_sum: nil, action_space: nil
+  defstruct player: [], dealer: [], player_sum: nil, dealer_sum: nil, action_space: nil, done: nil
 
   @type t :: %__MODULE__{
           player: list,
           dealer: list,
-          action_space: any
+          action_space: any,
+          done: bool
         }
 
   # card values
@@ -18,7 +19,13 @@ defmodule Gyx.Environments.Blackjack do
 
   @impl true
   def init(action_space) do
-    {:ok, %__MODULE__{player: draw_hand(), dealer: draw_hand(), action_space: action_space}}
+    {:ok,
+     %__MODULE__{
+       player: draw_hand(),
+       dealer: draw_hand(),
+       action_space: action_space,
+       done: false
+     }}
   end
 
   def start_link(_, opts) do
@@ -109,8 +116,10 @@ defmodule Gyx.Environments.Blackjack do
     {:reply, %Exp{}, new_env_state}
   end
 
-  defp env_state_transformer(state = %__MODULE__{player: p, dealer: d}) do
-    %{state | player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}
+  def handle_call(:observe, _from, state), do: {:reply, env_state_transformer(state), state}
+
+  defp env_state_transformer(%__MODULE__{player: p, dealer: d}) do
+    {Enum.sum(p), Enum.sum(d)}
   end
 
   defp draw_card(), do: @deck |> Enum.random()
