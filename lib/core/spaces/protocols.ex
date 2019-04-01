@@ -6,7 +6,7 @@ defprotocol Gyx.Core.Spaces do
   alias Gyx.Core.Spaces.{Discrete, Box}
 
   @type space :: Discrete.t() | Box.t()
-  @type discete_point :: integer()
+  @type discrete_point :: integer()
   @type box_point :: list(float())
 
   @doc """
@@ -42,8 +42,8 @@ defprotocol Gyx.Core.Spaces do
   @spec sample(space()) :: any()
   def sample(space)
 
-  @spec contains(space(), discete_point()) :: bool()
-  def contains(space, discete_point)
+  @spec contains(space(), discrete_point()) :: bool()
+  def contains(space, discrete_point)
 
   @doc """
   Sets the random generator used by `sample/1` with the
