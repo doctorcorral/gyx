@@ -14,11 +14,11 @@ defmodule Gyx.Environments.Blackjack do
             done: nil
 
   @type t :: %__MODULE__{
-          player: list,
-          dealer: list,
-          action_space: any,
-          observation_space: any,
-          done: bool
+          player: list(),
+          dealer: list(),
+          action_space: Discrete.t(),
+          observation_space: Tuple.t(),
+          done: bool()
         }
 
   # card values
