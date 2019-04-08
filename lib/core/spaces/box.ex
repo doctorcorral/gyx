@@ -16,7 +16,7 @@ defmodule Gyx.Core.Spaces.Box do
           low: float(),
           high: float(),
           shape: tuple(),
-          random_algorithm: atom(),
+          random_algorithm: :exrop | :exs1024 | :exs1024s | :exs64 | :exsp | :exsplus,
           seed: {integer(), integer(), integer()}
         }
 end

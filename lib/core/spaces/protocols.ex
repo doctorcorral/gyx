@@ -39,7 +39,7 @@ defprotocol Gyx.Core.Spaces do
       iex> Gyx.Core.Spaces.sample(%Gyx.Core.Spaces.Box{shape: {2}, high: 7}
       {:ok, [[3.173570417347619, 0.286615818442874]]}
   """
-  @spec sample(space()) :: any()
+  @spec sample(space()) :: point()
   def sample(space)
 
   @doc """
