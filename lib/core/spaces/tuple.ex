@@ -10,7 +10,7 @@ defmodule Gyx.Core.Spaces.Tuple do
 
   @type t :: %__MODULE__{
           spaces: list(space()),
-          random_algorithm: atom(),
+          random_algorithm: :exrop | :exs1024 | :exs1024s | :exs64 | :exsp | :exsplus,
           seed: {integer(), integer(), integer()}
         }
 end
