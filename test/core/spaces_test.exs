@@ -15,6 +15,6 @@ defmodule Gyx.Core.SpacesTest do
     {:ok, box_point} = Spaces.sample(box_space)
     assert Spaces.contains(box_space, box_point) == true
     assert Spaces.contains(box_space, [[0.5]]) == false
-    assert Spaces.contains(box_space, [[0.5], [0.5, 5.0]]) == true
+    assert Spaces.contains(box_space, [[0.5], [0.5, 5.0]]) == false
   end
 end

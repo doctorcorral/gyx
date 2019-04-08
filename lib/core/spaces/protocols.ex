@@ -5,7 +5,7 @@ defprotocol Gyx.Core.Spaces do
   """
   alias Gyx.Core.Spaces.{Discrete, Box}
 
-  @type space :: Discrete.t | Box.t
+  @type space :: Discrete.t() | Box.t()
   @type discrete_point :: integer
   @type box_point :: list(list(float))
   @type point :: box_point | discrete_point
@@ -83,10 +83,10 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
 
   def contains(box_space, box_point) do
     IO.inspect({length(Tuple.to_list(box_space.shape)), length(box_point)})
+
     with shape_expected <- Tuple.to_list(box_space.shape),
          zip <- Enum.zip(shape_expected, box_point),
-         {len, len} <- {length(shape_expected), length(box_point)}
-         do
+         {len, len} <- {length(shape_expected), length(box_point)} do
       not Enum.any?(zip, fn {e, v} ->
         e != length(v) or Enum.any?(v, &(not (box_space.low <= &1 and &1 <= box_space.high)))
       end)
