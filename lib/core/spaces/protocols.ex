@@ -51,8 +51,8 @@ defprotocol Gyx.Core.Spaces do
       iex> Spaces.contains(box_space, box_point)
       true
   """
-  @spec contains(space(), point()) :: bool()
-  def contains(space, point)
+  @spec contains?(space(), point()) :: bool()
+  def contains?(space, point)
 
   @doc """
   Sets the random generator used by `sample/1` with the
@@ -66,7 +66,7 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Discrete do
     {:ok, :rand.uniform(discrete_space.n) - 1}
   end
 
-  def contains(discrete_space, discrete_point) do
+  def contains?(discrete_space, discrete_point) do
     discrete_point in 0..(discrete_space.n - 1)
   end
 end
@@ -81,7 +81,7 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
     {:ok, random_action}
   end
 
-  def contains(box_space, box_point) do
+  def contains?(box_space, box_point) do
     IO.inspect({length(Tuple.to_list(box_space.shape)), length(box_point)})
 
     with shape_expected <- Tuple.to_list(box_space.shape),
