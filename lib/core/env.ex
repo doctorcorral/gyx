@@ -31,7 +31,7 @@ defmodule Gyx.Core.Env do
     quote do
       @behaviour Gyx.Core.Env
 
-      @enforce_keys [:action_space]
+      @enforce_keys [:action_space, :observation_space]
 
       def get_state(), do: GenServer.call(__MODULE__, :get_state)
       def observe(), do: GenServer.call(__MODULE__, :observe)

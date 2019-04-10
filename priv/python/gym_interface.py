@@ -10,7 +10,8 @@ def make(envname):
     env = gym.make(en)
     initial_state = env.reset()
     action_space = str(env.action_space).strip()
-    return (env, initial_state, action_space)
+    observation_space = str(env.observation_space).strip()
+    return (env, initial_state, action_space, observation_space)
 
 
 def step(env, _step):
