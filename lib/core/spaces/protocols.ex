@@ -3,12 +3,13 @@ defprotocol Gyx.Core.Spaces do
   This protocol defines basic functions to interact with
   action and observation spaces.
   """
-  alias Gyx.Core.Spaces.{Discrete, Box}
+  alias Gyx.Core.Spaces.{Discrete, Box, Tuple}
 
-  @type space :: Discrete.t() | Box.t()
+  @type space :: Discrete.t() | Box.t() | Tuple.t()
   @type discrete_point :: integer
   @type box_point :: list(list(float))
-  @type point :: box_point | discrete_point
+  @type tuple_point :: list(discrete_point | box_point())
+  @type point :: box_point | discrete_point | tuple_point
   @doc """
   Samples a random point from a space.
   Note that sampled points are very different in nature
@@ -39,7 +40,7 @@ defprotocol Gyx.Core.Spaces do
       iex> Gyx.Core.Spaces.sample(%Gyx.Core.Spaces.Box{shape: {2}, high: 7}
       {:ok, [[3.173570417347619, 0.286615818442874]]}
   """
-  @spec sample(space()) :: point()
+  @spec sample(space()) :: {atom(), point()}
   def sample(space)
 
   @doc """
