@@ -12,6 +12,8 @@ defmodule Gyx.Core.Env do
   Should it be a way to obtain an evironment state abstraction as suposed to be shown
   to an agent? i.e. an indirect observation.
   """
+  alias Gyx.Core.Spaces.{Discrete, Space, Tuple}
+  @type space :: Discrete.t() | Space.t() | Tuple.t()
 
   @doc "Sets the state of the environment to its default"
   @callback reset() :: any()
