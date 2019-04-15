@@ -28,7 +28,7 @@ defmodule Gyx.MixProject do
       {:ex_doc, "~> 0.19", only: :dev},
       {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
       {:erlport, "~> 0.9"},
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false}
+      {:dialyxir, "~> 0.5.1", only: [:dev], runtime: false}
     ]
   end
 end
