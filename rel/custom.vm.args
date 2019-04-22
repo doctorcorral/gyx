@@ -1,4 +1,5 @@
--name <%= release_name %>@{POD_IP}
+#set REPLACE_OS_VARS=true en var in order to inject env vars required here
+-name <%= release_name %>@${POD_IP}
 
 -setcookie ${ERLANG_COOKIE}
 
