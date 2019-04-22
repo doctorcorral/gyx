@@ -1,0 +1,5 @@
+-name <%= release_name %>@{POD_IP}
+
+-setcookie ${ERLANG_COOKIE}
+
+-smp auto
