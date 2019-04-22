@@ -49,7 +49,7 @@ release :gyx do
   set version: current_version(:gyx)
   set applications: [
     :runtime_tools,
-    :gyx: permanent
+    gyx: :permanent
   ]
 end
 
