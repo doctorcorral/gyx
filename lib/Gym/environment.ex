@@ -5,17 +5,25 @@ defmodule Gyx.Gym.Environment do
   """
   alias Gyx.Helpers.Python
   alias Gyx.Core.{Env, Exp}
+  alias Gyx.Core.Spaces.{Discrete, Box, Tuple}
   import Gyx.Gym.Utils, only: [gyx_space: 1]
   use Env
   use GenServer
   require Logger
-  defstruct env: nil, current_state: nil, session: nil, action_space: nil
 
+  defstruct env: nil,
+            current_state: nil,
+            session: nil,
+            action_space: nil,
+            observation_space: nil
+
+  @type space :: Discrete.t() | Box.t() | Tuple.t()
   @type t :: %__MODULE__{
           env: any(),
           current_state: any(),
           session: any(),
-          action_space: any()
+          action_space: space(),
+          observation_space: space()
         }
 
   @impl true
@@ -25,11 +33,18 @@ defmodule Gyx.Gym.Environment do
     Logger.info("In order to assign a Gym environment to this process,
     please use #{__MODULE__}.make(ENVIRONMENTNAME)\n")
 
-    {:ok, %__MODULE__{env: nil, current_state: nil, session: python_session, action_space: nil}}
+    {:ok,
+     %__MODULE__{
+       env: nil,
+       current_state: nil,
+       session: python_session,
+       action_space: nil,
+       observation_space: nil
+     }}
   end
 
   def start_link(_, opts) do
-    GenServer.start_link(__MODULE__, %__MODULE__{action_space: nil}, opts)
+    GenServer.start_link(__MODULE__, %__MODULE__{action_space: nil, observation_space: nil}, opts)
   end
 
   def render() do
@@ -51,7 +66,7 @@ defmodule Gyx.Gym.Environment do
   end
 
   def handle_call({:make, environment_name}, _from, state) do
-    {env, initial_state, action_space} =
+    {env, initial_state, action_space, observation_space} =
       Python.call(
         state.session,
         :gym_interface,
@@ -64,7 +79,8 @@ defmodule Gyx.Gym.Environment do
        env: env,
        current_state: initial_state,
        session: state.session,
-       action_space: gyx_space(action_space)
+       action_space: gyx_space(action_space),
+       observation_space: gyx_space(observation_space)
      }}
   end
 
@@ -91,11 +107,17 @@ defmodule Gyx.Gym.Environment do
 
   @impl true
   def handle_call(:reset, _from, state) do
-    {env, initial_state, action_space} =
+    {env, initial_state, action_space, observation_space} =
       Python.call(state.session, :gym_interface, :reset, [state.env])
 
     {:reply, %Exp{},
-     %{state | env: env, current_state: initial_state, action_space: gyx_space(action_space)}}
+     %{
+       state
+       | env: env,
+         current_state: initial_state,
+         action_space: gyx_space(action_space),
+         observation_space: gyx_space(observation_space)
+     }}
   end
 
   def handle_call(:render, _from, state) do
