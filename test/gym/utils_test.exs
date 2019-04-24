@@ -6,7 +6,7 @@ defmodule Gyx.Gym.UtilsTest do
   end
 
   test "Box" do
-    assert Map.get(Gyx.Gym.Utils.gyx_space('Box(2,)'), :shape) == {2,}
+    assert Map.get(Gyx.Gym.Utils.gyx_space('Box(2,)'), :shape) == {2, }
   end
 
 end
