@@ -112,8 +112,6 @@ defmodule Gyx.Environments.FrozenLake do
      }, new_state}
   end
 
-  def handle_call(:get_state, _from, state), do: {:reply, state, state}
-
   defp get_position(map, row, col) do
     Enum.at(String.graphemes(Enum.at(map, row)), col)
   end
