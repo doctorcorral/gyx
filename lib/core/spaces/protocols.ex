@@ -3,7 +3,13 @@ defprotocol Gyx.Core.Spaces do
   This protocol defines basic functions to interact with
   action and observation spaces.
   """
+  alias Gyx.Core.Spaces.{Discrete, Box, Tuple}
 
+  @type space :: Discrete.t() | Box.t() | Tuple.t()
+  @type discrete_point :: integer
+  @type box_point :: list(list(float))
+  @type tuple_point :: list(discrete_point | box_point())
+  @type point :: box_point | discrete_point | tuple_point
   @doc """
   Samples a random point from a space.
   Note that sampled points are very different in nature
@@ -34,7 +40,20 @@ defprotocol Gyx.Core.Spaces do
       iex> Gyx.Core.Spaces.sample(%Gyx.Core.Spaces.Box{shape: {2}, high: 7}
       {:ok, [[3.173570417347619, 0.286615818442874]]}
   """
+  @spec sample(space()) :: {atom(), point()}
   def sample(space)
+
+  @doc """
+  Verifies if a particular action or observation point lies inside a given space.
+
+  ## Examples
+      iex> box_space = %Box{shape: {1, 2}}
+      iex> {:ok, box_point} = Spaces.sample(box_space)
+      iex> Spaces.contains(box_space, box_point)
+      true
+  """
+  @spec contains?(space(), point()) :: bool()
+  def contains?(space, point)
 
   @doc """
   Sets the random generator used by `sample/1` with the
@@ -47,6 +66,10 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Discrete do
   def sample(discrete_space) do
     {:ok, :rand.uniform(discrete_space.n) - 1}
   end
+
+  def contains?(discrete_space, discrete_point) do
+    discrete_point in 0..(discrete_space.n - 1)
+  end
 end
 
 defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
@@ -57,6 +80,20 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
       |> Enum.map(&get_rands(&1, box_space))
 
     {:ok, random_action}
+  end
+
+  def contains?(box_space, box_point) do
+    IO.inspect({length(Tuple.to_list(box_space.shape)), length(box_point)})
+
+    with shape_expected <- Tuple.to_list(box_space.shape),
+         zip <- Enum.zip(shape_expected, box_point),
+         {len, len} <- {length(shape_expected), length(box_point)} do
+      not Enum.any?(zip, fn {e, v} ->
+        e != length(v) or Enum.any?(v, &(not (box_space.low <= &1 and &1 <= box_space.high)))
+      end)
+    else
+      _ -> false
+    end
   end
 
   defp get_rands(n, box_space) do

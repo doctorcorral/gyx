@@ -1,14 +1,24 @@
 defmodule Gyx.Environments.Blackjack do
   alias Gyx.Core.{Env, Exp}
+  alias Gyx.Core.Spaces.{Discrete, Tuple}
   use Env
   use GenServer
   require Logger
-  defstruct player: [], dealer: [], player_sum: nil, dealer_sum: nil, action_space: nil
+
+  defstruct player: [],
+            dealer: [],
+            player_sum: nil,
+            dealer_sum: nil,
+            action_space: nil,
+            observation_space: nil,
+            done: nil
 
   @type t :: %__MODULE__{
-          player: list,
-          dealer: list,
-          action_space: any
+          player: list(),
+          dealer: list(),
+          action_space: Discrete.t(),
+          observation_space: Tuple.t(),
+          done: bool()
         }
 
   # card values
@@ -17,12 +27,28 @@ defmodule Gyx.Environments.Blackjack do
   @action_space [0, 1]
 
   @impl true
-  def init(action_space) do
-    {:ok, %__MODULE__{player: draw_hand(), dealer: draw_hand(), action_space: action_space}}
+  def init(%{action_space: action_space, observation_space: observation_space}) do
+    {:ok,
+     %__MODULE__{
+       player: draw_hand(),
+       dealer: draw_hand(),
+       action_space: action_space,
+       observation_space: observation_space,
+       done: false
+     }}
   end
 
   def start_link(_, opts) do
-    GenServer.start_link(__MODULE__, %Gyx.Core.Spaces.Discrete{n: 2}, opts)
+    GenServer.start_link(
+      __MODULE__,
+      %{
+        action_space: %Discrete{n: 2},
+        observation_space: %Tuple{
+          spaces: [%Discrete{n: 32}, %Discrete{n: 11}, %Discrete{n: 2}]
+        }
+      },
+      opts
+    )
   end
 
   @impl true
@@ -103,14 +129,19 @@ defmodule Gyx.Environments.Blackjack do
     new_env_state = %__MODULE__{
       player: draw_hand(),
       dealer: draw_hand(),
-      action_space: %Gyx.Core.Spaces.Discrete{n: 2}
+      action_space: %Discrete{n: 2},
+      observation_space: %Tuple{
+        spaces: [%Discrete{n: 32}, %Discrete{n: 11}, %Discrete{n: 2}]
+      }
     }
 
     {:reply, %Exp{}, new_env_state}
   end
 
-  defp env_state_transformer(state = %__MODULE__{player: p, dealer: d}) do
-    %{state | player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}
+  def handle_call(:observe, _from, state), do: {:reply, env_state_transformer(state), state}
+
+  defp env_state_transformer(%__MODULE__{player: p, dealer: d}) do
+    {Enum.sum(p), Enum.sum(d)}
   end
 
   defp draw_card(), do: @deck |> Enum.random()

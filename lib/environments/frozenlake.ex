@@ -6,18 +6,26 @@ defmodule Gyx.Environments.FrozenLake do
   """
 
   alias Gyx.Core.{Env, Exp}
+  alias Gyx.Core.Spaces.Discrete
   use Env
   use GenServer
 
-  defstruct map: nil, row: nil, col: nil, ncol: nil, nrow: nil, action_space: nil
+  defstruct map: nil,
+            row: nil,
+            col: nil,
+            ncol: nil,
+            nrow: nil,
+            action_space: nil,
+            observation_space: nil
 
   @type t :: %__MODULE__{
           map: list(charlist),
-          row: integer,
-          col: integer,
-          ncol: integer,
-          nrow: integer,
-          action_space: any
+          row: integer(),
+          col: integer(),
+          ncol: integer(),
+          nrow: integer(),
+          action_space: Discrete.t(),
+          observation_space: Discrete.t()
         }
 
   @actions %{0 => :left, 1 => :down, 2 => :right, 3 => :up}
@@ -53,7 +61,8 @@ defmodule Gyx.Environments.FrozenLake do
        col: 0,
        nrow: length(map),
        ncol: String.length(List.first(map)),
-       action_space: %Gyx.Core.Spaces.Discrete{n: 4}
+       action_space: %Discrete{n: 4},
+       observation_space: %Discrete{n: 16}
      }}
   end
 
