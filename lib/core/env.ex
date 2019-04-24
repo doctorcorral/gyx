@@ -13,16 +13,22 @@ defmodule Gyx.Core.Env do
   to an agent? i.e. an indirect observation.
   """
 
+  alias Gyx.Core.Exp
+
+  @type initial_state :: Exp.t()
+  @type observation :: any()
+  @type action :: any()
+
   @doc "Sets the state of the environment to its default"
-  @callback reset() :: any()
+  @callback reset() :: initial_state()
   @doc "Gets an environment representation usable by the agent"
-  @callback observe() :: any()
+  @callback observe() :: observation()
   @doc """
-  Recieves an agent's action and responds to it,
+  Recieves an agent's `action` and responds to it,
   informing the agent back with a reward, a modified environment
   and a termination signal
   """
-  @callback step(any()) :: Gyx.Core.Exp.t()
+  @callback step(action()) :: Exp.t()
 
   @doc "Retrieves the parameters for current environment state"
   @callback get_state() :: any()
@@ -33,8 +39,12 @@ defmodule Gyx.Core.Env do
 
       @enforce_keys [:action_space, :observation_space]
 
-      def get_state(), do: GenServer.call(__MODULE__, :get_state)
       def observe(), do: GenServer.call(__MODULE__, :observe)
+
+      def get_state(), do: GenServer.call(__MODULE__, :get_state)
+      def handle_call(:get_state, _from, state), do: {:reply, state, state}
+
+
       defoverridable get_state: 0
     end
   end
