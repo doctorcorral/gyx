@@ -1,6 +1,11 @@
 defmodule Gyx.Helpers.Python do
+  @moduledoc """
+  This module contains proxy functions to interact
+  with Python processes via [Erlport](http://erlport.org/docs/python.html)
+  """
+
   @doc """
-   Start python instance with custom modules dir priv/python
+   Start python instance with custom modules dir `priv/python`
   """
   def start() do
     path =

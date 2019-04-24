@@ -65,6 +65,10 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
 end
 
 defmodule Gyx.Core.Spaces.Shared do
+  @moduledoc """
+  This module contains functions to be shared
+  across all types condiered by all Gyx.Core.Spaces protocols
+  """
   def set_seed(%{random_algorithm: algo, seed: seed}) do
     :rand.seed(algo, seed)
   end
