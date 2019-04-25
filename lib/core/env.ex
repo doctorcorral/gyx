@@ -42,8 +42,6 @@ defmodule Gyx.Core.Env do
       def observe(), do: GenServer.call(__MODULE__, :observe)
 
       def get_state(), do: GenServer.call(__MODULE__, :get_state)
-      def handle_call(:get_state, _from, state), do: {:reply, state, state}
-
 
       defoverridable get_state: 0
     end
