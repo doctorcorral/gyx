@@ -18,7 +18,8 @@ defmodule Gyx.Trainers.TrainerSarsa do
           rewards: list(number())
         }
 
-  @env_module Gyx.Gym.Environment
+  #@env_module Gyx.Gym.Environment
+  @env_module Gyx.Environments.Blackjack
   @agent Gyx.Agents.SARSA.Agent
 
   def init(_) do
@@ -82,7 +83,7 @@ defmodule Gyx.Trainers.TrainerSarsa do
   defp initialize_trajectory(t), do: %{t | trajectory: []}
 
   defp log_stats(t) do
-    reward_sum = Enum.map(t.trajectory, & &1.reward) |> Enum.sum()
+    reward_sum = t.trajectory |> Enum.map(& &1.reward) |> Enum.sum()
     t = %{t | rewards: [reward_sum | t.rewards]}
     k = 100
     Logger.info("Reward: " <> to_string((t.rewards |> Enum.take(k) |> Enum.sum()) / k))
