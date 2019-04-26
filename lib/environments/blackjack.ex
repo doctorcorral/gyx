@@ -117,8 +117,6 @@ defmodule Gyx.Environments.Blackjack do
     GenServer.call(__MODULE__, {:act, action})
   end
 
-  def handle_call(:get_state, _from, state), do: {:reply, state, state}
-
   def handle_call(:get_state_abstraction, _from, state = %__MODULE__{player: p, dealer: d}) do
     Logger.debug(inspect(state))
     {:reply, %{state | player_sum: Enum.sum(p), dealer_sum: Enum.sum(d)}, state}
