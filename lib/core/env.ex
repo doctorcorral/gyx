@@ -35,6 +35,7 @@ defmodule Gyx.Core.Env do
 
   defmacro __using__(_params) do
     quote do
+      @before_compile Gyx.Core.Env
       @behaviour Gyx.Core.Env
 
       @enforce_keys [:action_space, :observation_space]
@@ -46,4 +47,11 @@ defmodule Gyx.Core.Env do
       defoverridable get_state: 0
     end
   end
+
+  defmacro __before_compile__(_) do
+    quote do
+      def handle_call(:get_state, _from, state), do: {:reply, state, state}
+    end
+  end
+
 end

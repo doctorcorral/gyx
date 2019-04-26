@@ -83,8 +83,6 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
   end
 
   def contains?(box_space, box_point) do
-    IO.inspect({length(Tuple.to_list(box_space.shape)), length(box_point)})
-
     with shape_expected <- Tuple.to_list(box_space.shape),
          zip <- Enum.zip(shape_expected, box_point),
          {len, len} <- {length(shape_expected), length(box_point)} do
