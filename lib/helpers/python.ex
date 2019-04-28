@@ -17,6 +17,7 @@ defmodule Gyx.Helpers.Python do
 
     {:ok, pid} =
       :python.start([
+        {:python, 'python3'},
         {:python_path, to_charlist(path)}
       ])
 
