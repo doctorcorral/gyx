@@ -14,7 +14,10 @@ Environments in `Gyx` can be implemented by using [`Env`](https://github.com/doc
 
 A wrapper environment module for calling [OpenAI Gym](https://gym.openai.com/) environments can be found in [`Gyx.Gym.Environment`](https://github.com/doctorcorral/gyx/blob/master/lib/Gym/environment.ex)
 
-> NOTE: Gym library must be installed. You can follow install instructions depicted in [DRLND](https://github.com/udacity/deep-reinforcement-learning#dependencies) repo, then activate the Python environment with `soure activate drlnd`.
+> NOTE: Gym library must be installed. You can do it by yourself or 
+use the `Dockerfile` on this repo for developlment purposes. 
+Just run `docker build -t gyx ./` on this directory, then `docker run gyx` will
+allow you to have everything set up, run `iex -S mix` and start playing. 
 
 For a Gym environment to be used, it is necessary to initialize the `Gyx` process to a particular environment by calling `make/1`
 
