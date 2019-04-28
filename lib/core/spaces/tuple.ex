@@ -4,7 +4,7 @@ defmodule Gyx.Core.Spaces.Tuple do
   """
   alias Gyx.Core.Spaces.{Discrete, Box}
 
-  defstruct spaces: nil, seed: {1,2,3}, random_algorithm: :exsplus
+  defstruct spaces: nil, seed: {1, 2, 3}, random_algorithm: :exsplus
 
   @type space :: Discrete.t() | Box.t()
 

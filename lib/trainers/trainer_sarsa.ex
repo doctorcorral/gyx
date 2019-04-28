@@ -41,7 +41,7 @@ defmodule Gyx.Trainers.TrainerSarsa do
   end
 
   def handle_call(:train, _from, t = %__MODULE__{}) do
-    {:reply, trainer(t, 10000), t}
+    {:reply, trainer(t, 10_000), t}
   end
 
   @spec trainer(__MODULE__.t(), integer) :: __MODULE__.t()
