@@ -9,4 +9,8 @@ defmodule Gyx.Gym.UtilsTest do
     assert Map.get(Gyx.Gym.Utils.gyx_space('Box(2,)'), :shape) == {2, }
   end
 
+  test "Box multi" do
+    assert Map.get(Gyx.Gym.Utils.gyx_space('Box(2, 4)'), :shape) == {2, 4}
+  end
+
 end
