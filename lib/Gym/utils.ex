@@ -5,14 +5,19 @@ defmodule Gyx.Gym.Utils do
   Gyx space representations from Gym space specs.
   """
   @space_types [{~r/Discrete\((?<n>\d+)\)/, :discrete},
-                {~r/Box\((?<shape>((\d)+,)+)\)/, :box}]
+                {~r/Box\((?<shape>((\d)+,)+)\)/x, :box},
+                {~r/Box\((?<shape>((\d)+,)+(\d)+)\)/x, :box}
+              ]
 
   @doc """
   This function takes the __repr__ response from Gym spaces
   and creates an equivalent Gyx Space struct
   """
   def gyx_space(gym_space_string) do
-    gym_space_string |> parse |> create_space
+    gym_space_string
+    |> remove_spaces
+    |> parse
+    |> create_space
   end
 
   defp parse(gym_space_string) do
@@ -40,4 +45,11 @@ defmodule Gyx.Gym.Utils do
   end
 
   defp create_space({:unknown, nil}), do: %{}
+
+  defp remove_spaces(in_char_list) do
+    in_char_list
+    |> to_string
+    |> String.replace(~r/[\s]/, "")
+    |> to_charlist
+  end
 end
