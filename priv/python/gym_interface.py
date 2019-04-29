@@ -27,7 +27,10 @@ def render(env):
 
 def reset(env):
     initial_state = env.reset()
-    return (env, initial_state, str(env.action_space).strip())
+    return (env, 
+            initial_state, 
+            str(env.action_space).strip(), 
+            str(env.observation_space).strip())
 
 
 def action_space_sample(env):
