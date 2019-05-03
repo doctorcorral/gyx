@@ -3,10 +3,9 @@ from erlport.erlang import set_encoder, set_decoder
 
 
 def make(envname):
-    print("🔥 🔥 🔥 Imporing Gym environment from Python:")
+    print("🐍 🐍 🐍 -- Imporing Gym environment from Python:")
     en = str(envname, encoding='ascii')
-    print("⏩ ⏩ ⏩ {0}".format(envname))
-    print("🔥 🔥 🔥 😎")
+    print("⏩ ⏩ ⏩ -- {0}".format(envname))
     env = gym.make(en)
     initial_state = env.reset()
     action_space = str(env.action_space).strip()
