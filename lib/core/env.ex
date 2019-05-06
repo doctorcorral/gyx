@@ -44,14 +44,28 @@ defmodule Gyx.Core.Env do
 
       def get_state(), do: GenServer.call(__MODULE__, :get_state)
 
+      @impl true
+      def step(action) do
+        case action_checked = GenServer.call(__MODULE__, {:check, action}) do
+          {:error, _} -> action_checked
+          {:ok, action} -> GenServer.call(__MODULE__, {:act, action})
+        end
+      end
+
       defoverridable get_state: 0
     end
   end
 
   defmacro __before_compile__(_) do
     quote do
+      def handle_call({:check, action}, _from, state = %__MODULE__{action_space: action_space}) do
+        case Gyx.Core.Spaces.contains?(action_space, action) do
+          false -> {:reply, {:error, "invalid_action"}, state}
+          _ -> {:reply, {:ok, action}, state}
+        end
+      end
+
       def handle_call(:get_state, _from, state), do: {:reply, state, state}
     end
   end
-
 end
