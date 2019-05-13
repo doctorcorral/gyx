@@ -21,7 +21,7 @@ defmodule Gyx.Gym.Environment do
   @type t :: %__MODULE__{
           env: any(),
           current_state: any(),
-          session: any(),
+          session: pid(),
           action_space: space(),
           observation_space: space()
         }
