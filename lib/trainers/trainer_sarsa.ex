@@ -19,7 +19,7 @@ defmodule Gyx.Trainers.TrainerSarsa do
         }
 
   #@env_module Gyx.Gym.Environment
-  @env_module Gyx.Environments.Blackjack
+  @env_module Gyx.Environments.Gridworld
   @agent Gyx.Agents.SARSA.Agent
 
   def init(_) do

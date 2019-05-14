@@ -12,6 +12,7 @@ defmodule Gyx.Supervisor do
 
   defp children do
     [
+      worker(Gyx.Environments.Gridworld, [[], [name: Gyx.Environments.Gridworld]]),
       worker(Gyx.Environments.Blackjack, [[], [name: Gyx.Environments.Blackjack]]),
       worker(Gyx.Environments.FrozenLake, [[], [name: Gyx.Environments.FrozenLake]]),
       worker(Gyx.Qstorage.QGenServer, [[], [name: Gyx.Qstorage.QGenServer]]),
