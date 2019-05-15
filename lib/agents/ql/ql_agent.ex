@@ -18,7 +18,7 @@ defmodule Gyx.Agents.QL.Agent do
        Q: QGenServer,
        alpha: 0.2,
        gamma: 0.9,
-       epsilon: 0.8,
+       epsilon: 0.2,
        epsilon_min: 0.1
      }}
   end

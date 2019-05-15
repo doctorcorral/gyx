@@ -74,7 +74,7 @@ defmodule Gyx.Trainers.TrainerQL do
       |> t.environment.step
 
     aa =
-      t.agent.act_greedy(%{
+      t.agent.act_epsilon_greedy(%{
         observation: ss,
         action_space: t.environment.get_state().action_space
       })
