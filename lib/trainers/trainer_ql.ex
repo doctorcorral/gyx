@@ -20,7 +20,7 @@ defmodule Gyx.Trainers.TrainerQL do
         }
 
   @env_module Gyx.Gym.Environment
-  #@env_module Gyx.Environments.Blackjack
+  # @env_module Gyx.Environments.Blackjack
   @agent Gyx.Agents.QL.Agent
 
   def init(_) do
@@ -94,8 +94,12 @@ defmodule Gyx.Trainers.TrainerQL do
   end
 
   defp log_reward(t) do
+    t = %{
+      t
+      | total_reward: t.total_reward + (t.trajectory |> Enum.map(& &1.reward) |> Enum.sum())
+    }
+
     Logger.info("Total Reward: " <> to_string(t.total_reward))
     t
   end
-
 end
