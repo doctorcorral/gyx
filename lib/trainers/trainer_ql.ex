@@ -9,13 +9,14 @@ defmodule Gyx.Trainers.TrainerQL do
 
   @enforce_keys [:environment, :agent]
 
-  defstruct environment: nil, agent: nil, trajectory: nil, rewards: nil
+  defstruct environment: nil, agent: nil, trajectory: nil, rewards: nil, total_reward: nil
 
   @type t :: %__MODULE__{
           environment: any(),
           agent: any(),
           trajectory: list(Exp),
-          rewards: list(number())
+          rewards: list(number()),
+          total_reward: number()
         }
 
   @env_module Gyx.Gym.Environment
@@ -28,7 +29,8 @@ defmodule Gyx.Trainers.TrainerQL do
        environment: @env_module,
        agent: @agent,
        trajectory: [],
-       rewards: []
+       rewards: [],
+       total_reward: 0
      }}
   end
 
@@ -71,7 +73,7 @@ defmodule Gyx.Trainers.TrainerQL do
       |> t.environment.step
 
     aa =
-      t.agent.act_epsilon_greedy(%{
+      t.agent.act_greedy(%{
         observation: ss,
         action_space: t.environment.get_state().action_space
       })
@@ -92,8 +94,7 @@ defmodule Gyx.Trainers.TrainerQL do
   end
 
   defp log_reward(t) do
-    reward_sum = t.trajectory |> Enum.map(& &1.reward) |> Enum.sum()
-    Logger.info("Episode Reward: " <> to_string(reward_sum))
+    Logger.info("Total Reward: " <> to_string(t.total_reward))
     t
   end
 
