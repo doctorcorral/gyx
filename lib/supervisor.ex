@@ -18,7 +18,9 @@ defmodule Gyx.Supervisor do
       worker(Gyx.Gym.Environment, [[], [name: Gyx.Gym.Environment]]),
       worker(Gyx.Agents.SARSA.Agent, [[], [name: Gyx.Agents.SARSA.Agent]]),
       worker(Gyx.Trainers.TrainerSarsa, [[], [name: Gyx.Trainers.TrainerSarsa]]),
-      worker(Gyx.Experience.ReplayBufferETS, [[], [name: Gyx.Experience.ReplayBufferETS]])
+      worker(Gyx.Experience.ReplayBufferETS, [[], [name: Gyx.Experience.ReplayBufferETS]]),
+      worker(Gyx.Agents.QL.Agent, [[], [name: Gyx.Agents.QL.Agent]]),
+      worker(Gyx.Trainers.TrainerQL, [[], [name: Gyx.Trainers.TrainerQL]]),
     ]
   end
 end
