@@ -56,7 +56,6 @@ defmodule Gyx.Trainers.TrainerQL do
     t
     |> initialize_trajectory()
     |> run_episode(false)
-    |> eval_episode(false)
     |> log_stats()
     |> log_reward(@num_episodes - remaining_episodes)
     |> trainer(remaining_episodes - 1)
@@ -81,29 +80,8 @@ defmodule Gyx.Trainers.TrainerQL do
       })
 
     t.agent.td_learn({s, a, r, ss, aa})
-    run_episode(t, done)
-  end
-
-  defp eval_episode(t = %__MODULE__{}, true), do: t
-
-  defp eval_episode(t = %__MODULE__{}, false) do
-    exp =
-      %Exp{done: done, state: s, action: a, reward: r, next_state: ss} =
-      %{
-        observation: t.environment.observe(),
-        action_space: t.environment.get_state().action_space
-      }
-      |> t.agent.act_greedy()
-      |> t.environment.step
-
-    aa =
-      t.agent.act_greedy(%{
-        observation: ss,
-        action_space: t.environment.get_state().action_space
-      })
-
     t = %{t | trajectory: [exp | t.trajectory]}
-    eval_episode(t, done)
+    run_episode(t, done)
   end
 
   defp initialize_trajectory(t), do: %{t | trajectory: []}
@@ -122,7 +100,7 @@ defmodule Gyx.Trainers.TrainerQL do
       | total_reward: t.total_reward + (t.trajectory |> Enum.map(& &1.reward) |> Enum.sum())
     }
 
-    Logger.info("Total Reward: " <> to_string(t.total_reward)/)
+    Logger.info("Total Reward: " <> to_string(t.total_reward)/episodes)
     t
   end
 end
