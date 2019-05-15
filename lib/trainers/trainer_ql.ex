@@ -100,7 +100,7 @@ defmodule Gyx.Trainers.TrainerQL do
       | total_reward: t.total_reward + (t.trajectory |> Enum.map(& &1.reward) |> Enum.sum())
     }
 
-    Logger.info("Total Reward: " <> to_string(t.total_reward)/episodes)
+    Logger.info("Total Reward: " <> to_string(t.total_reward / episodes))
     t
   end
 end
