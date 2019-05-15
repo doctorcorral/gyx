@@ -75,6 +75,13 @@ defmodule Gyx.Agents.QL.Agent do
   end
 
   def handle_call({:act_greedy, environment_state}, _from, state = %{Q: qtable}) do
-    {:reply, qtable.get_max_action(environment_state.observation), state}
+    {:ok, random_action} = Spaces.sample(environment_state.action_space)
+
+    max_action =
+      case qtable.get_max_action(environment_state.observation) do
+        {:ok, action} -> action
+        {:error, _} -> random_action
+      end
+    {:reply, max_action, state}
   end
 end
