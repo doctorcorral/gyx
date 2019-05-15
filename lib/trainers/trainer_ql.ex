@@ -54,6 +54,7 @@ defmodule Gyx.Trainers.TrainerQL do
     |> initialize_trajectory()
     |> run_episode(false)
     |> log_stats()
+    |> log_reward()
     |> trainer(num_episodes - 1)
   end
 
@@ -66,7 +67,7 @@ defmodule Gyx.Trainers.TrainerQL do
         observation: t.environment.observe(),
         action_space: t.environment.get_state().action_space
       }
-      |> t.agent.act_epsilon_greedy()
+      |> t.agent.act_greedy()
       |> t.environment.step
 
     aa =
@@ -89,4 +90,11 @@ defmodule Gyx.Trainers.TrainerQL do
     Logger.info("Reward: " <> to_string((t.rewards |> Enum.take(k) |> Enum.sum()) / k))
     t
   end
+
+  defp log_reward(t) do
+    reward_sum = t.trajectory |> Enum.map(& &1.reward) |> Enum.sum()
+    Logger.info("Episode Reward: " <> to_string(reward_sum))
+    t
+  end
+
 end
