@@ -11,7 +11,8 @@ RUN mix local.hex --force && mix local.rebar --force
 #RUN mix deps.get
 
 RUN pip3 install https://download.pytorch.org/whl/cpu/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl
-RUN pip3 install torchvision ipython
+#RUN pip3 install torchvision 
+RUN pip3 install ipython
 RUN pip3 install pyvirtualdisplay
 RUN pip3 install gym[atari]
 
@@ -25,4 +26,7 @@ ENV MIX_ENV dev
 
 COPY . /gyx
 WORKDIR /gyx
+
+RUN mv /gyx/priv/.iex.exs ~/
+
 #ENTRYPOINT ["iex", "-S", "mix"]
