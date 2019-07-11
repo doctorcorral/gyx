@@ -16,7 +16,7 @@ A wrapper environment module for calling [OpenAI Gym](https://gym.openai.com/) e
 
 > NOTE: Gym library must be installed. You can do it by yourself or 
 use the `Dockerfile` on this repo for developlment purposes. 
-Just run `docker build -t gyx ./` on this directory, then `docker run gyx` will
+Just run `docker build -t gyx ./` on this directory, then `docker run -it gyx bash` will
 allow you to have everything set up, run `iex -S mix` and start playing. 
 
 For a Gym environment to be used, it is necessary to initialize the `Gyx` process to a particular environment by calling `make/1`
