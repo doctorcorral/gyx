@@ -7,8 +7,14 @@ RUN apt-get install -y python-opengl
 RUN apt-get install -y xvfb xserver-xephyr vnc4server
 RUN apt-get install -y python-pil scrot
 RUN apt-get install xvfb
+
+WORKDIR /gyx
+COPY . .
+
 RUN mix local.hex --force && mix local.rebar --force
-#RUN mix deps.get
+RUN mix deps.get
+
+RUN mv /gyx/priv/.iex.exs ~/
 
 RUN pip3 install https://download.pytorch.org/whl/cpu/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl
 #RUN pip3 install torchvision 
@@ -24,9 +30,5 @@ ENV LC_ALL en_US.UTF-8
 ENV APP_NAME gyx
 ENV MIX_ENV dev
 
-COPY . /gyx
-WORKDIR /gyx
-
-RUN mv /gyx/priv/.iex.exs ~/
 
 #ENTRYPOINT ["iex", "-S", "mix"]
