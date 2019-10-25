@@ -1,5 +1,5 @@
 
-![test](https://raw.githubusercontent.com/doctorcorral/gyx/master/images/gyxheader.png)
+![test](https://raw.githubusercontent.com/doctorcorral/gyx/master/images/gyxheader-elixir.png)
 
 # Gyx
 
