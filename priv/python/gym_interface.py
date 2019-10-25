@@ -36,7 +36,7 @@ def action_space_sample(env):
     return env.action_space.sample()
 
 
-def getScreenRGB2(env):
+def getScreenRGB2(env, channel):
     #    return List([List([List(j[0]) for j in i]) 
     return List([List([j[0] for j in i]) 
                     for i in env.ale.getScreenRGB2()])
