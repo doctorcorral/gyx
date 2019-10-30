@@ -65,8 +65,8 @@ defmodule Gyx.Gym.Environment do
     GenServer.call(__MODULE__, :reset)
   end
 
-  def getScreenRGB2(channel) do
-    GenServer.call(__MODULE__, {:get_screen_channel, channel})
+  def getRGB() do
+    GenServer.call(__MODULE__, :get_rgb)
   end
 
   def handle_call({:make, environment_name}, _from, state) do
@@ -129,10 +129,10 @@ defmodule Gyx.Gym.Environment do
     {:reply, state.current_state, state}
   end
 
-  def handle_call({:get_screen_channel, channel}, _from, state) do
+  def handle_call(:get_rgb, _from, state) do
     screenRGB =
       Python.call(
-        state.session, :gym_interface, :getScreenRGB2, [state.env, channel])
+        state.session, :gym_interface, :getScreenRGB2, [state.env])
     {:reply, screenRGB, state}
   end
 
