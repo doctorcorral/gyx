@@ -7,6 +7,7 @@ RUN apt-get install -y python-opengl
 RUN apt-get install -y xvfb xserver-xephyr vnc4server
 RUN apt-get install -y python-pil scrot
 RUN apt-get install xvfb
+RUN apt-get install -y build-essential erlang-dev libatlas-base-dev
 
 WORKDIR /gyx
 COPY . .
