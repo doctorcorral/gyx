@@ -2,6 +2,7 @@ import gym
 from erlport.erlang import set_encoder, set_decoder
 from erlport.erlterms import List
 
+
 def make(envname):
     print("🐍 🐍 🐍 -- Imporing Gym environment from Python:")
     en = str(envname, encoding='ascii')
@@ -36,8 +37,10 @@ def action_space_sample(env):
     return env.action_space.sample()
 
 
-def getScreenRGB2(env, channel):
-    #    return List([List([List(j[0]) for j in i]) 
-    print(env.ale.getScreenRGB2().shape)
-    return List([List([j[int(channel)] for j in i]) 
-                    for i in env.ale.getScreenRGB2()])
+def getScreenRGB2(env):
+    return List([List([List([j[0] for j in i])
+                       for i in env.ale.getScreenRGB2()]),
+                 List([List([j[1] for j in i])
+                       for i in env.ale.getScreenRGB2()]),
+                 List([List([j[2] for j in i])
+                       for i in env.ale.getScreenRGB2()])])
