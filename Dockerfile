@@ -22,6 +22,7 @@ RUN pip3 install https://download.pytorch.org/whl/cpu/torch-1.0.1.post2-cp36-cp3
 RUN pip3 install ipython
 RUN pip3 install pyvirtualdisplay
 RUN pip3 install gym[atari]
+RUN pip3 install gym-retro
 
 ENV TERM xterm
 ENV LANG en_US.UTF-8  
