@@ -8,11 +8,11 @@ defmodule Gyx.Qstorage.QGenServer do
   """
   use GenServer
 
-  defstruct state_value_table: %{}
-  @type t :: %__MODULE__{state_value_table: %{}}
+  defstruct state_value_table: %{}, actions: nil
+  @type t :: %__MODULE__{state_value_table: %{}, actions: MapSet.t()}
 
   def init(_) do
-    {:ok, %__MODULE__{}}
+    {:ok, %__MODULE__{state_value_table: %{}, actions: MapSet.new()}}
   end
 
   def start_link(_, opts) do
@@ -31,12 +31,24 @@ defmodule Gyx.Qstorage.QGenServer do
     GenServer.call(__MODULE__, :get_q)
   end
 
+  def get_q_matrix() do
+    GenServer.call(__MODULE__, :get_q_matrix)
+  end
+
   def get_max_action(env_state) do
     GenServer.call(__MODULE__, {:get_max_action, env_state})
   end
 
   def handle_call(:get_q, _from, state = %__MODULE__{}),
     do: {:reply, state.state_value_table, state}
+
+  def handle_call(:get_q_matrix, _from, state = %__MODULE__{}) do
+    m = Map.values(state.state_value_table)
+    |> Enum.map(fn vs -> Map.values(vs) end)
+    |> Enum.filter(&(length(&1)==2))
+    |> Matrex.new()
+    {:reply, m, state}
+  end
 
   def handle_call(
         {:q_get, {env_state, action}},
@@ -50,7 +62,7 @@ defmodule Gyx.Qstorage.QGenServer do
   def handle_call(
         {:q_set, {env_state, action, value}},
         _from,
-        state = %__MODULE__{}
+        state = %__MODULE__{actions: actions}
       ) do
     k_state = inspect(env_state)
 
@@ -66,7 +78,12 @@ defmodule Gyx.Qstorage.QGenServer do
         Map.put(state.state_value_table[k_state], action, value)
       )
 
-    {:reply, new_state, %{state | state_value_table: new_state}}
+    {:reply, new_state,
+     %{
+       state
+       | state_value_table: new_state,
+         actions: MapSet.put(actions, action)
+     }}
   end
 
   def handle_call(
@@ -85,7 +102,7 @@ defmodule Gyx.Qstorage.QGenServer do
            state.state_value_table[k_state]
            |> Enum.sort_by(fn {_, v} -> v end, &>=/2)
            |> Enum.take(1) do
-      {:reply, {:ok, action} , state}
+      {:reply, {:ok, action}, state}
     else
       _ -> {:reply, {:error, "Environment state has not been observed."}, state}
     end
