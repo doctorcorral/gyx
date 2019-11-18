@@ -47,11 +47,11 @@ defmodule Gyx.Qstorage.QGenServer do
     do: {:reply, state.state_value_table, state}
 
   def handle_call(:get_q_matrix, _from, state = %__MODULE__{}) do
-    {:reply, map_to_matrix(state.state_value_table), state}
+    {:reply, map_to_matrix(state.state_value_table, MapSet.size(state.actions)), state}
   end
 
   def handle_call(:print_q_matrix, _from, state = %__MODULE__{}) do
-    map_to_matrix(state.state_value_table)
+    map_to_matrix(state.state_value_table, MapSet.size(state.actions))
     |> Matrex.heatmap(:color8 )
     |> (fn _ -> :ok end).()
     {:reply, :ok, state}
@@ -75,7 +75,8 @@ defmodule Gyx.Qstorage.QGenServer do
 
     state = %{
       state
-      | state_value_table: Map.put_new_lazy(state.state_value_table, k_state, fn -> %{} end)
+      | state_value_table: Map.put_new_lazy(state.state_value_table, k_state, fn -> %{} end),
+        actions: MapSet.put(actions, action)
     }
 
     new_state =
@@ -115,10 +116,10 @@ defmodule Gyx.Qstorage.QGenServer do
     end
   end
 
-  defp map_to_matrix(map_state_value_table) do
+  defp map_to_matrix(map_state_value_table, actions_size) do
     Map.values(map_state_value_table)
     |> Enum.map(fn vs -> Map.values(vs) end)
-    |> Enum.filter(&(length(&1)==2))
+    |> Enum.filter(&(length(&1)==actions_size))
     |> Matrex.new()
   end
 
