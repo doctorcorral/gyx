@@ -35,6 +35,10 @@ defmodule Gyx.Qstorage.QGenServer do
     GenServer.call(__MODULE__, :get_q_matrix)
   end
 
+  def print_q_matrix() do
+    GenServer.call(__MODULE__, :print_q_matrix)
+  end
+
   def get_max_action(env_state) do
     GenServer.call(__MODULE__, {:get_max_action, env_state})
   end
@@ -43,11 +47,14 @@ defmodule Gyx.Qstorage.QGenServer do
     do: {:reply, state.state_value_table, state}
 
   def handle_call(:get_q_matrix, _from, state = %__MODULE__{}) do
-    m = Map.values(state.state_value_table)
-    |> Enum.map(fn vs -> Map.values(vs) end)
-    |> Enum.filter(&(length(&1)==2))
-    |> Matrex.new()
-    {:reply, m, state}
+    {:reply, map_to_matrix(state.state_value_table, MapSet.size(state.actions)), state}
+  end
+
+  def handle_call(:print_q_matrix, _from, state = %__MODULE__{}) do
+    map_to_matrix(state.state_value_table, MapSet.size(state.actions))
+    |> Matrex.heatmap(:color8 )
+    |> (fn _ -> :ok end).()
+    {:reply, :ok, state}
   end
 
   def handle_call(
@@ -68,7 +75,8 @@ defmodule Gyx.Qstorage.QGenServer do
 
     state = %{
       state
-      | state_value_table: Map.put_new_lazy(state.state_value_table, k_state, fn -> %{} end)
+      | state_value_table: Map.put_new_lazy(state.state_value_table, k_state, fn -> %{} end),
+        actions: MapSet.put(actions, action)
     }
 
     new_state =
@@ -107,4 +115,12 @@ defmodule Gyx.Qstorage.QGenServer do
       _ -> {:reply, {:error, "Environment state has not been observed."}, state}
     end
   end
+
+  defp map_to_matrix(map_state_value_table, actions_size) do
+    Map.values(map_state_value_table)
+    |> Enum.map(fn vs -> Map.values(vs) end)
+    |> Enum.filter(&(length(&1)==actions_size))
+    |> Matrex.new()
+  end
+
 end
