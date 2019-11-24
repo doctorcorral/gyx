@@ -30,7 +30,7 @@ defmodule Gyx.Gym.Environment do
   def init(_) do
     python_session = Python.start()
     Logger.warn("Gym environment not associated yet with current #{__MODULE__} process")
-    Logger.info("In order to assign a Gym environment to this process,
+    Logger.warn("In order to assign a Gym environment to this process,
     please use #{__MODULE__}.make(ENVIRONMENTNAME)\n")
 
     {:ok,
@@ -48,7 +48,15 @@ defmodule Gyx.Gym.Environment do
   end
 
   def render() do
-    GenServer.call(__MODULE__, :render)
+    GenServer.call(__MODULE__, {:render, :python})
+  end
+
+  def render(output_device) do
+    GenServer.call(__MODULE__, {:render, output_device})
+  end
+
+  def render(output_device, opts = %{}) do
+    GenServer.call(__MODULE__, {:render, output_device, opts})
   end
 
   def make(environment_name) do
@@ -69,7 +77,13 @@ defmodule Gyx.Gym.Environment do
     GenServer.call(__MODULE__, :get_rgb)
   end
 
-  def handle_call({:make, environment_name}, _from, state) do
+  def handle_call(
+        {:make, environment_name},
+        _from,
+        state = %{session: session}
+      ) do
+    Logger.info("Starting OpenAI Gym environment: " <> environment_name, ansi_color: :magenta)
+
     {env, initial_state, action_space, observation_space} =
       Python.call(
         state.session,
@@ -78,7 +92,9 @@ defmodule Gyx.Gym.Environment do
         [environment_name]
       )
 
-    {:reply, initial_state,
+    Logger.info("Environment created on Python process: " <> inspect(session), ansi_color: :magenta)
+
+    {:reply, :ok,
      %__MODULE__{
        env: env,
        current_state: initial_state,
@@ -124,17 +140,36 @@ defmodule Gyx.Gym.Environment do
      }}
   end
 
-  def handle_call(:render, _from, state) do
+  def handle_call({:render, :python}, _from, state) do
     Python.call(state.session, :gym_interface, :render, [state.env])
-    {:reply, state.current_state, state}
+    {:noreply, state}
+  end
+
+  def handle_call({:render, :terminal}, _from, state) do
+    get_rgb(state.session, state.env)
+    |> Matrex.resize(0.5)
+    |> Matrex.heatmap(:color8)
+    |> (fn _ -> :ok end).()
+    {:noreply, state}
+  end
+
+  def handle_call({:render, :terminal, %{scale: scale}}, _from, state) do
+    get_rgb(state.session, state.env)
+    |> Matrex.resize(scale)
+    |> Matrex.heatmap(:color8)
+    |> (fn _ -> :ok end).()
+    {:noreply, state}
   end
 
   def handle_call(:get_rgb, _from, state) do
-    screenRGB =
-      Python.call(
-        state.session, :gym_interface, :getScreenRGB2, [state.env])
+    screenRGB = get_rgb(state.session, state.env)
     {:reply, screenRGB, state}
   end
 
   def handle_call(:observe, _from, state), do: {:reply, state.current_state, state}
+
+  defp get_rgb(python_session, env) do
+    Python.call(python_session, :gym_interface, :getScreenRGB2, [env])
+    |> Matrex.new
+  end
 end
