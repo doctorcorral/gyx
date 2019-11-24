@@ -126,7 +126,7 @@ defmodule Gyx.Qstorage.QGenServer do
     end
   end
 
-  defp map_to_matrix(_, states_size, actions_size) when actions_size < 2 do
+  defp map_to_matrix(_, _, actions_size) when actions_size < 2 do
     Matrex.new([[0, 0], [0, 0]])
   end
 
