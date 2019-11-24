@@ -4,10 +4,9 @@ from erlport.erlterms import List
 
 
 def make(envname):
-    print("🐍 🐍 🐍 -- Imporing Gym environment from Python:")
     en = str(envname, encoding='ascii')
-    print("⏩ ⏩ ⏩ -- {0}".format(envname))
     env = gym.make(en)
+    print("             < 🐍  >  Loaded Gym environment {0} from Python ✔".format(envname))
     initial_state = env.reset()
     action_space = str(env.action_space).strip()
     observation_space = str(env.observation_space).strip()
