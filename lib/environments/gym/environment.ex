@@ -1,4 +1,4 @@
-defmodule Gyx.Gym.Environment do
+defmodule Gyx.Environments.Gym do
   @moduledoc """
   This module is an API for accessing
   Python OpenAI Gym methods

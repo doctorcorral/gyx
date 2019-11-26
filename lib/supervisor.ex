@@ -13,7 +13,7 @@ defmodule Gyx.Supervisor do
   defp children do
     [
       worker(Gyx.Qstorage.QGenServer, [[], [name: Gyx.Qstorage.QGenServer]]),
-      worker(Gyx.Environments.Gym.Environment, [[], [name: Gyx.Environments.Gym.Environment]]),
+      worker(Gyx.Environments.Gym, [[], [name: Gyx.Environments.Gym]]),
       worker(Gyx.Agents.SARSA.Agent, [[], [name: Gyx.Agents.SARSA.Agent]]),
       worker(Gyx.Trainers.TrainerSarsa, [[], [name: Gyx.Trainers.TrainerSarsa]]),
       worker(Gyx.Experience.ReplayBufferETS, [[], [name: Gyx.Experience.ReplayBufferETS]])
