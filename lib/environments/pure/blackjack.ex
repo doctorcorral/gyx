@@ -1,4 +1,4 @@
-defmodule Gyx.Environments.Blackjack do
+defmodule Gyx.Environments.Pure.Blackjack do
   @moduledoc """
   This is an environment implementation of the game of
   [Blackjack](https://en.wikipedia.org/wiki/Blackjack) as
@@ -86,7 +86,9 @@ defmodule Gyx.Environments.Blackjack do
      }}
   end
 
-  def start_link(_, opts) do
+  def start_link(_) do
+    Logger.info("Starting Environment: " <> inspect(__MODULE__), ansi_color: :magenta)
+
     GenServer.start_link(
       __MODULE__,
       %{
@@ -94,8 +96,7 @@ defmodule Gyx.Environments.Blackjack do
         observation_space: %Tuple{
           spaces: [%Discrete{n: 32}, %Discrete{n: 11}, %Discrete{n: 2}]
         }
-      },
-      opts
+      }
     )
   end
 
