@@ -18,8 +18,8 @@ defmodule Gyx.Trainers.TrainerSarsa do
           rewards: list(number())
         }
 
-  #@env_module Gyx.Gym.Environment
-  @env_module Gyx.Environments.Blackjack
+  @env_module Gyx.Environments.Gym
+  #@env_module Gyx.Environments.Blackjack
   @agent Gyx.Agents.SARSA.Agent
 
   def init(_) do
@@ -41,7 +41,7 @@ defmodule Gyx.Trainers.TrainerSarsa do
   end
 
   def handle_call(:train, _from, t = %__MODULE__{}) do
-    {:reply, trainer(t, 10_000), t}
+    {:reply, trainer(t, 500), t}
   end
 
   @spec trainer(__MODULE__.t(), integer) :: __MODULE__.t()
@@ -52,7 +52,9 @@ defmodule Gyx.Trainers.TrainerSarsa do
 
     t
     |> initialize_trajectory()
+    #|> IO.inspect(label: "Trajectory initialized")
     |> run_episode(false)
+    #|> IO.inspect(label: "Episode finished")
     |> log_stats()
     |> trainer(num_episodes - 1)
   end
@@ -87,6 +89,7 @@ defmodule Gyx.Trainers.TrainerSarsa do
     t = %{t | rewards: [reward_sum | t.rewards]}
     k = 100
     Logger.info("Reward: " <> to_string((t.rewards |> Enum.take(k) |> Enum.sum()) / k))
+    Gyx.Qstorage.QGenServer.print_q_matrix()
     t
   end
 end
