@@ -6,7 +6,7 @@ RUN apt-get install -y esl-erlang elixir
 RUN apt-get install -y python-opengl
 RUN apt-get install -y xvfb xserver-xephyr vnc4server
 RUN apt-get install -y python-pil scrot
-RUN apt-get install -y xvfb
+RUN apt-get install -y lsof telnet
 RUN apt-get install -y build-essential erlang-dev libatlas-base-dev
 
 WORKDIR /gyx
@@ -22,7 +22,7 @@ RUN pip3 install https://download.pytorch.org/whl/cpu/torch-1.0.1.post2-cp36-cp3
 RUN pip3 install ipython
 RUN pip3 install pyvirtualdisplay
 RUN pip3 install gym[atari]
-RUN pip3 install gym-retro
+#RUN pip3 install gym-retro
 
 ENV TERM xterm
 ENV LANG en_US.UTF-8  
