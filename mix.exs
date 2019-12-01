@@ -7,6 +7,7 @@ defmodule Gyx.MixProject do
       version: "0.1.0",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
+      description: "Gyx allows designing and training Reinforcement Learning tasks. It includes environment abstractions that allows interaction with Python based environments like OpenAI Gym.",
       deps: deps()
     ]
   end
@@ -30,7 +31,9 @@ defmodule Gyx.MixProject do
       {:erlport, "~> 0.10.0"},
       {:distillery, "~> 1.5", runtime: false},
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
-      {:matrex, "~> 0.6"}
+      {:matrex, "~> 0.6"},
+      {:observer_cli, "~> 1.5"},
+      {:libcluster, "~> 3.0"}
     ]
   end
 end
