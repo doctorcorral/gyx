@@ -7,7 +7,8 @@ defmodule Gyx.MixProject do
       version: "0.1.0",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
-      description: "Gyx allows designing and training Reinforcement Learning tasks. It includes environment abstractions that allows interaction with Python based environments like OpenAI Gym.",
+      description: description(),
+      package: package(),
       deps: deps()
     ]
   end
@@ -34,6 +35,23 @@ defmodule Gyx.MixProject do
       {:matrex, "~> 0.6"},
       {:observer_cli, "~> 1.5"},
       {:libcluster, "~> 3.0"}
+    ]
+  end
+
+  defp description do
+    """
+    Gyx allows designing and training Reinforcement Learning tasks.
+    It includes environment abstractions that allows
+    interaction with Python based environments like OpenAI Gym.
+    """
+  end
+
+  defp package do
+    [
+      files: ["lib", "mix.exs", "README*", "LICENSE*"],
+      maintainers: ["Ricardo Corral-Corral"],
+      licenses: ["BSD-2-Clause"],
+      links: %{"GitHub" => "https://github.com/doctorcorral/gyx"}
     ]
   end
 end
