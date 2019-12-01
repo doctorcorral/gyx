@@ -41,14 +41,13 @@ defmodule Gyx.MixProject do
   defp description do
     """
     Gyx allows designing and training Reinforcement Learning tasks.
-    It includes environment abstractions that allows
-    interaction with Python based environments like OpenAI Gym.
+    It includes environment abstractions that allows interaction with Python based environments like OpenAI Gym.
     """
   end
 
   defp package do
     [
-      files: ["lib", "mix.exs", "README*", "LICENSE*"],
+      files: ["lib", "mix.exs", "README*", "LICENSE*", "config"],
       maintainers: ["Ricardo Corral-Corral"],
       licenses: ["BSD-2-Clause"],
       links: %{"GitHub" => "https://github.com/doctorcorral/gyx"}
