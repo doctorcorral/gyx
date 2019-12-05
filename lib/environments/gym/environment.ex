@@ -47,16 +47,16 @@ defmodule Gyx.Environments.Gym do
     GenServer.start_link(__MODULE__, %__MODULE__{action_space: nil, observation_space: nil}, opts)
   end
 
-  def render() do
-    GenServer.call(__MODULE__, {:render, :python})
+  def render(environment) do
+    GenServer.call(environment, {:render, :python})
   end
 
-  def render(output_device) do
-    GenServer.call(__MODULE__, {:render, output_device})
+  def render(environment,output_device) do
+    GenServer.call(environment, {:render, output_device})
   end
 
-  def render(output_device, opts = %{}) do
-    GenServer.call(__MODULE__, {:render, output_device, opts})
+  def render(environment, output_device, opts = %{}) do
+    GenServer.call(environment, {:render, output_device, opts})
   end
 
   def make(environment_name) do
@@ -64,13 +64,8 @@ defmodule Gyx.Environments.Gym do
   end
 
   @impl true
-  def step(action) do
-    GenServer.call(__MODULE__, {:act, action})
-  end
-
-  @impl true
-  def reset() do
-    GenServer.call(__MODULE__, :reset)
+  def reset(environment) do
+    GenServer.call(environment, :reset)
   end
 
   def getRGB() do
