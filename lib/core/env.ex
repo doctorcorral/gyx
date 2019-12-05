@@ -41,8 +41,10 @@ defmodule Gyx.Core.Env do
 
       @enforce_keys [:action_space, :observation_space]
 
+      @impl true
       def observe(environment), do: GenServer.call(environment, :observe)
 
+      @impl true
       def get_state(environment), do: GenServer.call(environment, :get_state)
 
       @impl true
@@ -53,7 +55,7 @@ defmodule Gyx.Core.Env do
         end
       end
 
-      defoverridable get_state: 0
+      defoverridable get_state: 1
     end
   end
 
