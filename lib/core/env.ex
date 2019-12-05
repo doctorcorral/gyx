@@ -18,20 +18,21 @@ defmodule Gyx.Core.Env do
   @type initial_state :: Exp.t()
   @type observation :: any()
   @type action :: any()
+  @type environment :: any()
 
   @doc "Sets the state of the environment to its default"
-  @callback reset() :: initial_state()
+  @callback reset(environment) :: initial_state()
   @doc "Gets an environment representation usable by the agent"
-  @callback observe() :: observation()
+  @callback observe(environment) :: observation()
   @doc """
   Recieves an agent's `action` and responds to it,
   informing the agent back with a reward, a modified environment
   and a termination signal
   """
-  @callback step(action()) :: Exp.t() | {:error, reason :: String.t()}
+  @callback step(environment, action()) :: Exp.t() | {:error, reason :: String.t()}
 
   @doc "Retrieves the parameters for current environment state"
-  @callback get_state() :: any()
+  @callback get_state(environment) :: any()
 
   defmacro __using__(_params) do
     quote do
@@ -40,15 +41,15 @@ defmodule Gyx.Core.Env do
 
       @enforce_keys [:action_space, :observation_space]
 
-      def observe(), do: GenServer.call(__MODULE__, :observe)
+      def observe(environment), do: GenServer.call(environment, :observe)
 
-      def get_state(), do: GenServer.call(__MODULE__, :get_state)
+      def get_state(environment), do: GenServer.call(environment, :get_state)
 
       @impl true
-      def step(action) do
-        case action_checked = GenServer.call(__MODULE__, {:check, action}) do
+      def step(environment, action) do
+        case action_checked = GenServer.call(environment, {:check, action}) do
           {:error, _} -> action_checked
-          {:ok, action} -> GenServer.call(__MODULE__, {:act, action})
+          {:ok, action} -> GenServer.call(environment, {:act, action})
         end
       end
 
