@@ -59,8 +59,8 @@ defmodule Gyx.Environments.Gym do
     GenServer.call(environment, {:render, output_device, opts})
   end
 
-  def make(environment_name) do
-    GenServer.call(__MODULE__, {:make, environment_name})
+  def make(environment, environment_name) do
+    GenServer.call(environment, {:make, environment_name})
   end
 
   @impl true
@@ -75,13 +75,13 @@ defmodule Gyx.Environments.Gym do
   def handle_call(
         {:make, environment_name},
         _from,
-        state = %{session: session}
+        %{session: session}
       ) do
     Logger.info("Starting OpenAI Gym environment: " <> environment_name, ansi_color: :magenta)
 
     {env, initial_state, action_space, observation_space} =
       Python.call(
-        state.session,
+        session,
         :gym_interface,
         :make,
         [environment_name]
@@ -93,7 +93,7 @@ defmodule Gyx.Environments.Gym do
      %__MODULE__{
        env: env,
        current_state: initial_state,
-       session: state.session,
+       session: session,
        action_space: gyx_space(action_space),
        observation_space: gyx_space(observation_space)
      }}
