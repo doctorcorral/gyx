@@ -75,38 +75,32 @@ defmodule Gyx.Environments.Pure.Blackjack do
   @deck [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
 
   @impl true
-  def init(%{action_space: action_space, observation_space: observation_space}) do
+  def init(_) do
     {:ok,
      %__MODULE__{
        player: draw_hand(),
        dealer: draw_hand(),
-       action_space: action_space,
-       observation_space: observation_space,
+       action_space: %Discrete{n: 2},
+       observation_space: %Tuple{
+         spaces: [%Discrete{n: 32}, %Discrete{n: 11}, %Discrete{n: 2}]
+       },
        done: false
      }}
   end
 
-  def start_link(_) do
+  def start_link(_, opts) do
     Logger.info("Starting Environment: " <> inspect(__MODULE__), ansi_color: :magenta)
 
-    GenServer.start_link(
-      __MODULE__,
-      %{
-        action_space: %Discrete{n: 2},
-        observation_space: %Tuple{
-          spaces: [%Discrete{n: 32}, %Discrete{n: 11}, %Discrete{n: 2}]
-        }
-      }
-    )
+    GenServer.start_link(__MODULE__, [], opts)
   end
 
   @impl true
-  def reset() do
-    GenServer.call(__MODULE__, :reset)
+  def reset(environment) do
+    GenServer.call(environment, :reset)
   end
 
-  def get_state_abstraction() do
-    GenServer.call(__MODULE__, :get_state_abstraction)
+  def get_state_abstraction(environment) do
+    GenServer.call(environment, :get_state_abstraction)
   end
 
   def handle_call(:get_state_abstraction, _from, state = %__MODULE__{player: p, dealer: d}) do

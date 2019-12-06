@@ -47,30 +47,25 @@ defmodule Gyx.Environments.Gym do
     GenServer.start_link(__MODULE__, %__MODULE__{action_space: nil, observation_space: nil}, opts)
   end
 
-  def render() do
-    GenServer.call(__MODULE__, {:render, :python})
+  def render(environment) do
+    GenServer.call(environment, {:render, :python})
   end
 
-  def render(output_device) do
-    GenServer.call(__MODULE__, {:render, output_device})
+  def render(environment,output_device) do
+    GenServer.call(environment, {:render, output_device})
   end
 
-  def render(output_device, opts = %{}) do
-    GenServer.call(__MODULE__, {:render, output_device, opts})
+  def render(environment, output_device, opts = %{}) do
+    GenServer.call(environment, {:render, output_device, opts})
   end
 
-  def make(environment_name) do
-    GenServer.call(__MODULE__, {:make, environment_name})
-  end
-
-  @impl true
-  def step(action) do
-    GenServer.call(__MODULE__, {:act, action})
+  def make(environment, environment_name) do
+    GenServer.call(environment, {:make, environment_name})
   end
 
   @impl true
-  def reset() do
-    GenServer.call(__MODULE__, :reset)
+  def reset(environment) do
+    GenServer.call(environment, :reset)
   end
 
   def getRGB() do
@@ -80,13 +75,13 @@ defmodule Gyx.Environments.Gym do
   def handle_call(
         {:make, environment_name},
         _from,
-        state = %{session: session}
+        %{session: session}
       ) do
     Logger.info("Starting OpenAI Gym environment: " <> environment_name, ansi_color: :magenta)
 
     {env, initial_state, action_space, observation_space} =
       Python.call(
-        state.session,
+        session,
         :gym_interface,
         :make,
         [environment_name]
@@ -98,7 +93,7 @@ defmodule Gyx.Environments.Gym do
      %__MODULE__{
        env: env,
        current_state: initial_state,
-       session: state.session,
+       session: session,
        action_space: gyx_space(action_space),
        observation_space: gyx_space(observation_space)
      }}

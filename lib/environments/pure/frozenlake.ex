@@ -1,4 +1,4 @@
-defmodule Gyx.Environments.FrozenLake do
+defmodule Gyx.Environments.Pure.FrozenLake do
   @moduledoc """
   This module implements the FrozenLake-v0
   environment according to
@@ -70,12 +70,12 @@ defmodule Gyx.Environments.FrozenLake do
   end
 
   @impl Env
-  def reset() do
-    GenServer.call(__MODULE__, :reset)
+  def reset(environment) do
+    GenServer.call(environment, :reset)
   end
 
-  def render() do
-    GenServer.call(__MODULE__, :render)
+  def render(environment) do
+    GenServer.call(environment, :render)
   end
 
   def handle_call(:render, _from, state) do
