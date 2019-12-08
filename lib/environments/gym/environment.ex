@@ -27,11 +27,19 @@ defmodule Gyx.Environments.Gym do
         }
 
   @impl true
-  def init(_) do
+  def init(reference_name) do
     python_session = Python.start()
+
+    name =
+      case reference_name do
+        nil -> inspect(self())
+        name -> ":#{name}"
+      end
+
+    Logger.warn(inspect(self()))
     Logger.warn("Gym environment not associated yet with current #{__MODULE__} process")
     Logger.warn("In order to assign a Gym environment to this process,
-    please use #{__MODULE__}.make(ENVIRONMENTNAME)\n")
+    please use #{__MODULE__}.make(#{name}, \"ENVIRONMENTNAME\")\n")
 
     {:ok,
      %__MODULE__{
@@ -44,18 +52,18 @@ defmodule Gyx.Environments.Gym do
   end
 
   def start_link(_, opts) do
-    GenServer.start_link(__MODULE__, %__MODULE__{action_space: nil, observation_space: nil}, opts)
+    GenServer.start_link(__MODULE__, opts[:name], opts)
   end
 
   def render(environment) do
     GenServer.call(environment, {:render, :python})
   end
 
-  def render(environment,output_device) do
+  def render(environment, output_device) do
     GenServer.call(environment, {:render, output_device})
   end
 
-  def render(environment, output_device, opts = %{}) do
+  def render(environment, output_device, opts) do
     GenServer.call(environment, {:render, output_device, opts})
   end
 
@@ -68,8 +76,8 @@ defmodule Gyx.Environments.Gym do
     GenServer.call(environment, :reset)
   end
 
-  def getRGB() do
-    GenServer.call(__MODULE__, :get_rgb)
+  def getRGB(environment) do
+    GenServer.call(environment, :get_rgb)
   end
 
   def handle_call(
@@ -87,7 +95,9 @@ defmodule Gyx.Environments.Gym do
         [environment_name]
       )
 
-    Logger.info("Environment created on Python process: " <> inspect(session), ansi_color: :magenta)
+    Logger.info("Environment created on Python process: " <> inspect(session),
+      ansi_color: :magenta
+    )
 
     {:reply, :ok,
      %__MODULE__{
@@ -145,14 +155,16 @@ defmodule Gyx.Environments.Gym do
     |> Matrex.resize(0.5)
     |> Matrex.heatmap(:color8)
     |> (fn _ -> :ok end).()
+
     {:noreply, state}
   end
 
-  def handle_call({:render, :terminal, %{scale: scale}}, _from, state) do
+  def handle_call({:render, :terminal, [scale: scale]}, _from, state) do
     get_rgb(state.session, state.env)
     |> Matrex.resize(scale)
     |> Matrex.heatmap(:color8)
     |> (fn _ -> :ok end).()
+
     {:noreply, state}
   end
 
@@ -165,6 +177,6 @@ defmodule Gyx.Environments.Gym do
 
   defp get_rgb(python_session, env) do
     Python.call(python_session, :gym_interface, :getScreenRGB2, [env])
-    |> Matrex.new
+    |> Matrex.new()
   end
 end

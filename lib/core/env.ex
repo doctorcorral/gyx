@@ -31,9 +31,6 @@ defmodule Gyx.Core.Env do
   """
   @callback step(environment, action()) :: Exp.t() | {:error, reason :: String.t()}
 
-  @doc "Retrieves the parameters for current environment state"
-  @callback get_state(environment) :: any()
-
   defmacro __using__(_params) do
     quote do
       @before_compile Gyx.Core.Env
@@ -45,17 +42,12 @@ defmodule Gyx.Core.Env do
       def observe(environment), do: GenServer.call(environment, :observe)
 
       @impl true
-      def get_state(environment), do: GenServer.call(environment, :get_state)
-
-      @impl true
       def step(environment, action) do
         case action_checked = GenServer.call(environment, {:check, action}) do
           {:error, _} -> action_checked
           {:ok, action} -> GenServer.call(environment, {:act, action})
         end
       end
-
-      defoverridable get_state: 1
     end
   end
 
@@ -67,8 +59,6 @@ defmodule Gyx.Core.Env do
           _ -> {:reply, {:ok, action}, state}
         end
       end
-
-      def handle_call(:get_state, _from, state), do: {:reply, state, state}
     end
   end
 end
