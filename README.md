@@ -22,23 +22,24 @@ allow you to have everything set up, run `iex -S mix` and start playing.
 For a Gym environment to be used, it is necessary to initialize the `Gyx` process to a particular environment by calling `make/1`
 
 ```Elixir
-iex(1)> Gyx.Environments.Gym.make("Blackjack-v0")
+iex(1)> Gyx.Environments.Gym.start_link [], name: :gym
 ```
-
-Now, the process `Gyx.Environments.Gym` will handle environment state and reference for the serving `:python` process.
-
-Now it is possible to run a training session with
+Named process `:gym` can now be associated with a particular gym environment
 
 ```Elixir
-iex(2)> Gyx.Trainers.TrainerSarsa.train
+iex(2)> Gyx.Environments.Gym.make :gym, "Blackjack-v0"
 ```
 
-Here, `Gyx.Trainers.TrainerSarsa.train` is already configured to use environment `Gyx.Environments.Gym` and agent `Gyx.Agents.SARSA.Agent` wich in turn, is configured to use `Gyx.Qstorage.QGenServer` as a *Q* table storage module.
-
-After finishing the training, optimal *Q* values can be seen with 
+Environment interactions are performed through `step`, getting an experience back
 
 ```Elixir
-iex(3)> Gyx.Qstorage.QGenServer.get_q
+iex(3)> Gyx.Environments.Gym.step :gym, 1
+%Gyx.Core.Exp{
+  action: 1,
+  done: false,
+  info: %{gym_info: {:"$erlport.opaque", :python, <<128, 2, 125, 113, 0, 46>>}},
+  next_state: {20, 7, false},
+  reward: 0.0,
+  state: {13, 7, false}
+}
 ```
-
-
