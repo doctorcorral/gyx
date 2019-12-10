@@ -19,28 +19,28 @@ defmodule Gyx.Qstorage.QGenServer do
     GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
   end
 
-  def q_get(env_state, action) do
-    GenServer.call(__MODULE__, {:q_get, {env_state, action}})
+  def q_get(qgenserver, env_state, action) do
+    GenServer.call(qgenserver, {:q_get, {env_state, action}})
   end
 
-  def q_set(env_state, action, value) do
-    GenServer.call(__MODULE__, {:q_set, {env_state, action, value}})
+  def q_set(qgenserver, env_state, action, value) do
+    GenServer.call(qgenserver, {:q_set, {env_state, action, value}})
   end
 
-  def get_q() do
-    GenServer.call(__MODULE__, :get_q)
+  def get_q(qgenserver) do
+    GenServer.call(qgenserver, :get_q)
   end
 
-  def get_q_matrix() do
-    GenServer.call(__MODULE__, :get_q_matrix)
+  def get_q_matrix(qgenserver) do
+    GenServer.call(qgenserver, :get_q_matrix)
   end
 
-  def print_q_matrix() do
-    GenServer.call(__MODULE__, :print_q_matrix)
+  def print_q_matrix(qgenserver) do
+    GenServer.call(qgenserver, :print_q_matrix)
   end
 
-  def get_max_action(env_state) do
-    GenServer.call(__MODULE__, {:get_max_action, env_state})
+  def get_max_action(qgenserver, env_state) do
+    GenServer.call(qgenserver, {:get_max_action, env_state})
   end
 
   def handle_call(:get_q, _from, state = %__MODULE__{}),
