@@ -13,9 +13,11 @@ defmodule Gyx.Agents.SARSA.Agent do
   alias Gyx.Core.Spaces
 
   def init(_) do
+    {:ok, qgenserver} = QGenServer.start_link([], [])
+    IO.puts(inspect(qgenserver))
     {:ok,
      %__MODULE__{
-       Q: QGenServer,
+       Q: qgenserver,
        learning_rate: 0.8,
        gamma: 0.9,
        epsilon: 0.8,
@@ -24,19 +26,19 @@ defmodule Gyx.Agents.SARSA.Agent do
   end
 
   def start_link(_, opts) do
-    GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
+    GenServer.start_link(__MODULE__, [], opts)
   end
 
-  def act_greedy(environment_state) do
-    GenServer.call(__MODULE__, {:act_greedy, environment_state})
+  def act_greedy(agent, environment_state) do
+    GenServer.call(agent, {:act_greedy, environment_state})
   end
 
-  def act_epsilon_greedy(environment_state) do
-    GenServer.call(__MODULE__, {:act_epsilon_greedy, environment_state})
+  def act_epsilon_greedy(agent, environment_state) do
+    GenServer.call(agent, {:act_epsilon_greedy, environment_state})
   end
 
-  def td_learn(sarsa) do
-    GenServer.call(__MODULE__, {:td_learn, sarsa})
+  def td_learn(agent, sarsa) do
+    GenServer.call(agent, {:td_learn, sarsa})
   end
 
   def handle_call(
@@ -44,10 +46,10 @@ defmodule Gyx.Agents.SARSA.Agent do
         _from,
         state = %{Q: qtable, learning_rate: learning_rate, gamma: gamma}
       ) do
-    predict = qtable.q_get(s, a)
-    target = r + gamma * qtable.q_get(ss, aa)
+    predict = QGenServer.q_get(qtable, s, a)
+    target = r + gamma * QGenServer.q_get(qtable, ss, aa)
     expected_return = predict + learning_rate * (target - predict)
-    qtable.q_set(s, a, expected_return)
+    QGenServer.q_set(qtable, s, a, expected_return)
     {:reply, expected_return, state}
   end
 
@@ -59,7 +61,7 @@ defmodule Gyx.Agents.SARSA.Agent do
     {:ok, random_action} = Spaces.sample(environment_state.action_space)
 
     max_action =
-      case qtable.get_max_action(environment_state.observation) do
+      case QGenServer.get_max_action(qtable, environment_state.observation) do
         {:ok, action} -> action
         {:error, _} -> random_action
       end
