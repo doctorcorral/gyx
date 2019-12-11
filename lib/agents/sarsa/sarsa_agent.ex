@@ -61,7 +61,7 @@ defmodule Gyx.Agents.SARSA.Agent do
     {:ok, random_action} = Spaces.sample(environment_state.action_space)
 
     max_action =
-      case QGenServer.get_max_action(qtable, environment_state.observation) do
+      case QGenServer.get_max_action(qtable, environment_state.current_state) do
         {:ok, action} -> action
         {:error, _} -> random_action
       end
@@ -76,6 +76,6 @@ defmodule Gyx.Agents.SARSA.Agent do
   end
 
   def handle_call({:act_greedy, environment_state}, _from, state = %{Q: qtable}) do
-    {:reply, qtable.get_max_action(environment_state.observation), state}
+    {:reply, qtable.get_max_action(environment_state.current_state), state}
   end
 end
