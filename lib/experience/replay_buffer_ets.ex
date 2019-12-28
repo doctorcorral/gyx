@@ -17,26 +17,26 @@ defmodule Gyx.Experience.ReplayBufferETS do
     {:ok, experiences}
   end
 
-  def delete(key) do
-    GenServer.cast(__MODULE__, {:delete, key})
+  def delete(replay_buffer, key) do
+    GenServer.cast(replay_buffer, {:delete, key})
   end
 
-  def get(key) do
-    GenServer.call(__MODULE__, {:get, key})
+  def get(replay_buffer, key) do
+    GenServer.call(replay_buffer, {:get, key})
   end
 
   @doc """
   Adds a new experience to the reppay buffer
   """
-  def add(experience) do
-    GenServer.cast(__MODULE__, {:add, experience})
+  def add(replay_buffer, experience) do
+    GenServer.cast(replay_buffer, {:add, experience})
   end
 
-  def get_batch({n, sampling_strategy}) do
-    GenServer.call(__MODULE__, {:get_batch, {n, sampling_strategy}})
+  def get_batch(replay_buffer, {n, sampling_strategy}) do
+    GenServer.call(replay_buffer, {:get_batch, {n, sampling_strategy}})
   end
 
-  def delete(), do: GenServer.cast(__MODULE__, :delete)
+  def delete(replay_buffer), do: GenServer.cast(replay_buffer, :delete)
 
   def handle_cast(:delete, state) do
     :ets.delete(:replay_buffer)
