@@ -8,6 +8,8 @@ defmodule Gyx.Qstorage.QGenServer do
   """
   use GenServer
 
+  @heatmap_color :color8
+
   defstruct state_value_table: %{}, actions: nil
   @type t :: %__MODULE__{state_value_table: %{}, actions: MapSet.t()}
 
@@ -50,7 +52,6 @@ defmodule Gyx.Qstorage.QGenServer do
     {:reply,
      map_to_matrix(
        state.state_value_table,
-       Kernel.map_size(state.state_value_table),
        MapSet.size(state.actions)
      ), state}
   end
@@ -58,10 +59,11 @@ defmodule Gyx.Qstorage.QGenServer do
   def handle_call(:print_q_matrix, _from, state = %__MODULE__{}) do
     map_to_matrix(
       state.state_value_table,
-      Kernel.map_size(state.state_value_table),
       MapSet.size(state.actions)
     )
-    |> Matrex.heatmap(:color8)
+
+    @heatmap_color
+    |> Matrex.heatmap()
     |> (fn _ -> :ok end).()
 
     {:reply, :ok, state}
@@ -126,12 +128,13 @@ defmodule Gyx.Qstorage.QGenServer do
     end
   end
 
-  defp map_to_matrix(_, _, actions_size) when actions_size < 2 do
+  defp map_to_matrix(_, actions_size) when actions_size < 2 do
     Matrex.new([[0, 0], [0, 0]])
   end
 
-  defp map_to_matrix(map_state_value_table, states_size, actions_size) do
-    Map.values(map_state_value_table)
+  defp map_to_matrix(map_state_value_table, actions_size) do
+    map_state_value_table
+    |> Map.values()
     |> Enum.map(fn vs -> Map.values(vs) end)
     |> Enum.filter(&(length(&1) == actions_size))
     |> (fn l ->

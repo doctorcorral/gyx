@@ -151,19 +151,23 @@ defmodule Gyx.Environments.Gym do
   end
 
   def handle_call({:render, :terminal}, _from, state) do
-    get_rgb(state.session, state.env)
-    |> Matrex.resize(0.5)
-    |> Matrex.heatmap(:color8)
-    |> (fn _ -> :ok end).()
+    with rgb <- get_rgb(state.session, state.env) do
+      rgb
+      |> Matrex.resize(0.5)
+      |> Matrex.heatmap(:color8)
+      |> (fn _ -> :ok end).()
+    end
 
     {:noreply, state}
   end
 
   def handle_call({:render, :terminal, [scale: scale]}, _from, state) do
-    get_rgb(state.session, state.env)
-    |> Matrex.resize(scale)
-    |> Matrex.heatmap(:color8)
-    |> (fn _ -> :ok end).()
+    with rgb <- get_rgb(state.session, state.env) do
+      rgb
+      |> Matrex.resize(scale)
+      |> Matrex.heatmap(:color8)
+      |> (fn _ -> :ok end).()
+    end
 
     {:noreply, state}
   end
@@ -176,7 +180,9 @@ defmodule Gyx.Environments.Gym do
   def handle_call(:observe, _from, state), do: {:reply, state.current_state, state}
 
   defp get_rgb(python_session, env) do
-    Python.call(python_session, :gym_interface, :getScreenRGB2, [env])
-    |> Matrex.new()
+    with rgb_matrix <- Python.call(python_session, :gym_interface, :getScreenRGB2, [env]) do
+      rgb_matrix
+      |> Matrex.new()
+    end
   end
 end
