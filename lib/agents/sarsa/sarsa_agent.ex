@@ -1,4 +1,13 @@
 defmodule Gyx.Agents.SARSA.Agent do
+  @moduledoc """
+  This agent implements SARSA, it takes into account the current
+  state, action, reward (s<sub>t</sub>, a<sub>t</sub>, r<sub>t</sub>)
+  and on policy estimates for the best next action a<sub>t+1</sub> and state s<sub>t+1</sub>.
+  <br/>The Q update is given by:
+  ![sarsa](https://wikimedia.org/api/rest_v1/media/math/render/svg/4ea76ebe74645baff9d5a67c83eac1daff812d79)
+  <br/>
+  The Q table process must be referenced on struct `Q` key, which must follow the `Gyx.Qstorage` behaviour
+  """
   defstruct Q: nil, learning_rate: nil, gamma: nil, epsilon: nil, epsilon_min: nil
 
   @type t :: %__MODULE__{
