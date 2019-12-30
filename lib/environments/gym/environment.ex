@@ -173,8 +173,8 @@ defmodule Gyx.Environments.Gym do
   end
 
   def handle_call(:get_rgb, _from, state) do
-    screenRGB = get_rgb(state.session, state.env)
-    {:reply, screenRGB, state}
+    screen_rgb = get_rgb(state.session, state.env)
+    {:reply, screen_rgb, state}
   end
 
   def handle_call(:observe, _from, state), do: {:reply, state.current_state, state}
