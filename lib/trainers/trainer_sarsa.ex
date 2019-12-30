@@ -87,12 +87,12 @@ defmodule Gyx.Trainers.TrainerSarsa do
       |> @env_module.step(next_action)
 
     aa =
-      @agent_module.act_epsilon_greedy(t.agent,%{
+      @agent_module.act_epsilon_greedy(t.agent, %{
         current_state: ss,
         action_space: action_space(t.environment)
       })
 
-    @agent_module.td_learn(t.agent,{s, a, r, ss, aa})
+    @agent_module.td_learn(t.agent, {s, a, r, ss, aa})
     t = %{t | trajectory: [exp | t.trajectory]}
     run_episode(t, done)
   end
