@@ -12,8 +12,11 @@ defmodule Gyx.Experience.ReplayBufferETS do
     GenServer.start_link(__MODULE__, %{}, ops)
   end
 
+  @impl true
   def init(_) do
-    experiences = :ets.new(:replay_buffer, [:ordered_set, :protected, :named_table])
+    experiences =
+      :ets.new(:__MODULE__, [:ordered_set, :public, :named_table, write_concurrency: true])
+
     {:ok, experiences}
   end
 
@@ -28,16 +31,19 @@ defmodule Gyx.Experience.ReplayBufferETS do
   @doc """
   Adds a new experience to the reppay buffer
   """
+  @impl true
   def add(replay_buffer, experience) do
     GenServer.cast(replay_buffer, {:add, experience})
   end
 
+  @impl true
   def get_batch(replay_buffer, {n, sampling_strategy}) do
     GenServer.call(replay_buffer, {:get_batch, {n, sampling_strategy}})
   end
 
   def delete(replay_buffer), do: GenServer.cast(replay_buffer, :delete)
 
+  @impl true
   def handle_cast(:delete, state) do
     :ets.delete(:replay_buffer)
     {:noreply, state}
@@ -54,6 +60,7 @@ defmodule Gyx.Experience.ReplayBufferETS do
     {:noreply, timestamp_key}
   end
 
+  @impl true
   def handle_call({:get, key}, _from, state) do
     reply =
       case :ets.lookup(:replay_buffer, key) do
