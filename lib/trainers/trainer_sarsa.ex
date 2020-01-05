@@ -20,11 +20,13 @@ defmodule Gyx.Trainers.TrainerSarsa do
         }
 
   @env_module Gyx.Environments.Gym
+  @q_storage_module Gyx.Qstorage.QGenServer
   @agent_module Gyx.Agents.SARSA.Agent
 
   def init(env_name) do
     {:ok, environment} = @env_module.start_link([], [])
-    {:ok, agent} = @agent_module.start_link([], [])
+    {:ok, qgenserver} = @q_storage_module.start_link([], [])
+    {:ok, agent} = @agent_module.start_link(qgenserver, [])
 
     {:ok,
      %__MODULE__{
