@@ -18,7 +18,7 @@ defmodule Gyx.Qstorage.QGenServer do
   end
 
   def start_link(_, opts) do
-    GenServer.start_link(__MODULE__, %__MODULE__{}, opts)
+    GenServer.start_link(__MODULE__, [], opts)
   end
 
   def q_get(qgenserver, env_state, action) do

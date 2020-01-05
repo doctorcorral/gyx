@@ -21,9 +21,15 @@ defmodule Gyx.Agents.SARSA.Agent do
   alias Gyx.Qstorage.QGenServer
   alias Gyx.Core.Spaces
 
-  def init(_) do
-    {:ok, qgenserver} = QGenServer.start_link([], [])
+  def init(process_q) do
+    {:ok, qgenserver} =
+      case is_pid(process_q) do
+        true -> {:ok, process_q}
+        false -> QGenServer.start_link([], [])
+      end
+
     IO.puts(inspect(qgenserver))
+
     {:ok,
      %__MODULE__{
        Q: qgenserver,
@@ -34,8 +40,12 @@ defmodule Gyx.Agents.SARSA.Agent do
      }}
   end
 
-  def start_link(_, opts) do
+  def start_link(opts) do
     GenServer.start_link(__MODULE__, [], opts)
+  end
+
+  def start_link(process_q, opts) when is_pid(process_q) do
+    GenServer.start_link(__MODULE__, process_q, opts)
   end
 
   def act_greedy(agent, environment_state) do
