@@ -7,6 +7,7 @@ defmodule Gyx.Experience.ReplayBufferETS do
   use ReplayMemory
 
   @compile {:parse_transform, :ms_transform}
+  @ets_name :__MODULE__
 
   def start_link(_, ops) do
     GenServer.start_link(__MODULE__, %{}, ops)
@@ -15,7 +16,7 @@ defmodule Gyx.Experience.ReplayBufferETS do
   @impl true
   def init(_) do
     experiences =
-      :ets.new(:__MODULE__, [:ordered_set, :public, :named_table, write_concurrency: true])
+      :ets.new(@ets_name, [:ordered_set, :public, :named_table, write_concurrency: true])
 
     {:ok, experiences}
   end
@@ -45,25 +46,25 @@ defmodule Gyx.Experience.ReplayBufferETS do
 
   @impl true
   def handle_cast(:delete, state) do
-    :ets.delete(:replay_buffer)
+    :ets.delete(:__MODULE__)
     {:noreply, state}
   end
 
   def handle_cast({:delete, key}, state) do
-    :ets.delete(:replay_buffer, key)
+    :ets.delete(:__MODULE__, key)
     {:noreply, state}
   end
 
   def handle_cast({:add, exp}, _state) do
     {:ok, timestamp_key} = DateTime.now("Etc/UTC")
-    :ets.insert(:replay_buffer, {timestamp_key, exp})
+    :ets.insert(@ets_name, {timestamp_key, exp})
     {:noreply, timestamp_key}
   end
 
   @impl true
   def handle_call({:get, key}, _from, state) do
     reply =
-      case :ets.lookup(:replay_buffer, key) do
+      case :ets.lookup(@ets_name, key) do
         [] -> nil
         [{_timestamp, experience}] -> experience
       end
@@ -73,7 +74,7 @@ defmodule Gyx.Experience.ReplayBufferETS do
 
   def handle_call({:get_batch, {n, :random}}, _from, state) do
     reply =
-      :replay_buffer
+      @ets_name
       |> :ets.select(all_match_specification())
       |> Enum.shuffle()
       |> Enum.take(n)
@@ -83,7 +84,7 @@ defmodule Gyx.Experience.ReplayBufferETS do
 
   def handle_call({:get_batch, {n, :latest}}, _from, state) do
     reply =
-      :replay_buffer
+      @ets_name
       |> :ets.select(all_match_specification())
       |> Enum.sort_by(fn {d, _exp} -> {d.year, d.month, d.day, d.second, d.microsecond} end)
       |> Enum.take(-n)
