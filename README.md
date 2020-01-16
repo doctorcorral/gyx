@@ -55,4 +55,13 @@ It is possible to render the screen for Gym based environments with `Gyx.Environ
 ```Elixir
 iex(7)> Gym.render gym_proc, :terminal, scale: 0.9
 ```
-![test](https://raw.githubusercontent.com/doctorcorral/gyx/master/images/spaceinvs1.png)
+
+<img src="https://raw.githubusercontent.com/doctorcorral/gyx/master/images/spaceinvs1.png)" align="left" height="42" width="42" >
+
+Any Environment contains action and observation space definitions, which can be used to sample random actions and observations
+```Elixir
+iex(7)> action_space = :sys.get_state(gym_proc).action_space
+%Gyx.Core.Spaces.Discrete{n:6, random_algorithm: :explus, seed: {1, 2, 3}}
+iex(8)> Gyx.Core.Spaces.sample action_space
+{:ok, 4}
+```
