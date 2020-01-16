@@ -43,3 +43,16 @@ iex(3)> Gyx.Environments.Gym.step :gym, 1
   state: {13, 7, false}
 }
 ```
+
+Environment processes IDs can be used directly
+```Elixir
+iex(4)> alias Gyx.Environments.Gym
+iex(5)> {:ok, gym_proc} = Gym.start_link [], [] 
+iex(6)> Gym.make gym_proc, "SpaceInvaders-v0"
+```
+
+It is possible to render the screen for Gym based environments with `Gyx.Environments.Gym.render` which relies on the internal Python Gym render method, alternatively, the screen can be rendered directly on the terminal.
+```Elixir
+iex(7)> Gym.render gym_proc, :terminal, scale: 0.9
+```
+![test](https://raw.githubusercontent.com/doctorcorral/gyx/master/images/spaceinvs1.png)
