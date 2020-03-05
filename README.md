@@ -9,7 +9,7 @@ At this moment, this repository contains ad hoc implementations of environments 
 Initial abstractions are already stablished, so higher level programs like training procedures can seamesly be integrated with particular environment, agents, and learning strategies.
 
 ## Usage
-### Solve Blackjack with [SARSA](https://en.wikipedia.org/wiki/State%E2%80%93action%E2%80%93reward%E2%80%93state%E2%80%93action)
+
 Environments in `Gyx` can be implemented by using [`Env`](https://github.com/doctorcorral/gyx/blob/master/lib/core/env.ex) behaviour.
 
 A wrapper environment module for calling [OpenAI Gym](https://gym.openai.com/) environments can be found in [`Gyx.Environments.Gym`](https://github.com/doctorcorral/gyx/blob/master/lib/environments/gym/environment.ex)
@@ -56,12 +56,12 @@ It is possible to render the screen for Gym based environments with `Gyx.Environ
 iex(7)> Gym.render gym_proc, :terminal, scale: 0.9
 ```
 
-<img src="https://raw.githubusercontent.com/doctorcorral/gyx/master/images/spaceinvs1.png)" align="left" height="42" width="42" >
+![SpaceInvadersATARI](https://raw.githubusercontent.com/doctorcorral/gyx/master/images/spaceinvs1.png)
 
 Any Environment contains action and observation space definitions, which can be used to sample random actions and observations
 ```Elixir
 iex(7)> action_space = :sys.get_state(gym_proc).action_space
-%Gyx.Core.Spaces.Discrete{n:6, random_algorithm: :explus, seed: {1, 2, 3}}
+%Gyx.Core.Spaces.Discrete{n: 6, random_algorithm: :explus, seed: {1, 2, 3}}
 iex(8)> Gyx.Core.Spaces.sample action_space
 {:ok, 4}
 ```
