@@ -4,7 +4,7 @@ defmodule Gyx.MixProject do
   def project do
     [
       app: :gyx,
-      version: "0.1.0",
+      version: "0.1.25",
       elixir: "~> 1.7",
       start_permanent: Mix.env() == :prod,
       description: description(),
