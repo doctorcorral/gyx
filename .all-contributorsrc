@@ -38,6 +38,19 @@
         "content",
         "mantainer"
       ]
+},
+{
+      "login": "davoclavo",
+      "name": "David Gómez U.",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/691096?s=460&&v=4",
+      "profile": "https://github.com/davoclavo",
+      "contributions": [
+        "question",
+        "review",
+        "talk",
+        "code",
+        "debug"
+      ]
 }
   ]
 }
