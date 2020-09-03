@@ -49,3 +49,13 @@ def getScreenRGB2(env):
     return List([List([int('#{:02x}{:02x}{:02x}'.
                            format(j[0], j[1], j[2])[1:], 16) for j in i])
                  for i in env.render(mode='rgb_array')])
+
+
+def getScreenRGB3(env):
+    rgb_array = env.render(mode='rgb_array')
+    return List([List([List([j[0] for j in i])
+                       for i in rgb_array]),
+                 List([List([j[1] for j in i])
+                       for i in rgb_array]),
+                 List([List([j[2] for j in i])
+                       for i in rgb_array])])

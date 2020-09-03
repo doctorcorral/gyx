@@ -1,5 +1,5 @@
 FROM ubuntu:18.04
-LABEL maintainer="ricardo@simbiotic.ai"
+LABEL maintainer="ricardo@suggestic.com"
 
 RUN apt update && apt install -y wget python3 python3-pip emacs
 RUN wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb && dpkg -i erlang-solutions_1.0_all.deb
