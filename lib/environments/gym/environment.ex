@@ -80,6 +80,10 @@ defmodule Gyx.Environments.Gym do
     GenServer.call(environment, :get_rgb)
   end
 
+  def getRGB(environment, :channels) do
+    GenServer.call(environment, :get_rgb_full)
+  end
+
   def handle_call(
         {:make, environment_name},
         _from,
@@ -177,12 +181,23 @@ defmodule Gyx.Environments.Gym do
     {:reply, screen_rgb, state}
   end
 
+  def handle_call(:get_rgb_full, _from, state) do
+    screen_rgb = get_rgb_full(state.session, state.env)
+    {:reply, screen_rgb, state}
+  end
+
   def handle_call(:observe, _from, state), do: {:reply, state.current_state, state}
 
   defp get_rgb(python_session, env) do
     with rgb_matrix <- Python.call(python_session, :gym_interface, :getScreenRGB2, [env]) do
       rgb_matrix
       |> Matrex.new()
+    end
+  end
+
+  defp get_rgb_full(python_session, env) do
+    with rgb_channels_list <- Python.call(python_session, :gym_interface, :getScreenRGB3, [env]) do
+      List.to_tuple(rgb_channels_list)
     end
   end
 end

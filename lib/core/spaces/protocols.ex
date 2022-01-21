@@ -59,7 +59,7 @@ defprotocol Gyx.Core.Spaces do
   Sets the random generator used by `sample/1` with the
   space defined seed.
   """
-  defdelegate set_seed(space), to: Gyx.Core.Spaces.Shared
+  Kernel.defdelegate set_seed(space), to: Gyx.Core.Spaces.Shared
 end
 
 defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Discrete do
@@ -96,15 +96,5 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
 
   defp get_rands(n, box_space) do
     Enum.map(1..n, fn _ -> :rand.uniform() * (box_space.high - box_space.low) + box_space.low end)
-  end
-end
-
-defmodule Gyx.Core.Spaces.Shared do
-  @moduledoc """
-  This module contains functions to be shared
-  across all types considered by all Gyx.Core.Spaces protocols
-  """
-  def set_seed(%{random_algorithm: algo, seed: seed}) do
-    :rand.seed(algo, seed)
   end
 end
