@@ -7,7 +7,7 @@ defprotocol Gyx.Core.Spaces do
 
   @type space :: Discrete.t() | Box.t() | Tuple.t()
   @type discrete_point :: integer
-  @type box_point :: list(list(float))
+  @type box_point :: Nx.Type.t()
   @type tuple_point :: list(discrete_point | box_point())
   @type point :: box_point | discrete_point | tuple_point
   @doc """
