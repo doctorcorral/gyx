@@ -59,7 +59,7 @@ defprotocol Gyx.Core.Spaces do
   Sets the random generator used by `sample/1` with the
   space defined seed.
   """
-  Kernel.defdelegate set_seed(space), to: Gyx.Core.Spaces.Shared
+  Kernel.defdelegate(set_seed(space), to: Gyx.Core.Spaces.Shared)
 end
 
 defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Discrete do
@@ -73,8 +73,19 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Discrete do
 end
 
 defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
-  def sample(box_space = %{shape: shape}) do
+  def sample(box_space = %{shape: shape, high: 1.0, low: 0.0}) do
     random_action = Nx.random_uniform(shape)
+
+    {:ok, random_action}
+  end
+
+  def sample(box_space = %{shape: shape, high: h, low: l}) do
+    raw_random_action = Nx.random_uniform(shape)
+    delta = Nx.add(h, Nx.negate(l))
+
+    random_action =
+      raw_random_action
+      |> Nx.map([type: {:f, 32}], fn x -> Nx.add(Nx.multiply(x, delta), l) end)
 
     {:ok, random_action}
   end
@@ -89,9 +100,5 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
     else
       _ -> false
     end
-  end
-
-  defp get_rands(n, box_space) do
-    Enum.map(1..n, fn _ -> :rand.uniform() * (box_space.high - box_space.low) + box_space.low end)
   end
 end
