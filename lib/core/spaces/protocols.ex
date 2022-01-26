@@ -90,15 +90,9 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
     {:ok, random_action}
   end
 
-  def contains?(box_space, box_point) do
-    with shape_expected <- Tuple.to_list(box_space.shape),
-         zip <- Enum.zip(shape_expected, box_point),
-         {len, len} <- {length(shape_expected), length(box_point)} do
-      not Enum.any?(zip, fn {e, v} ->
-        e != length(v) or Enum.any?(v, &(not (box_space.low <= &1 and &1 <= box_space.high)))
-      end)
-    else
-      _ -> false
-    end
+  def contains?(box_space = %{high: h, low: l}, box_point) do
+    high_eval = (Nx.all(Nx.greater_equal(box_point, l)) ==  Nx.tensor(1, [type: {:u, 8}]))
+    low_eval = (Nx.all(Nx.less_equal(box_point, h)) ==  Nx.tensor(1, [type: {:u, 8}]))
+    high_eval && low_eval
   end
 end
