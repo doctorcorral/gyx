@@ -7,7 +7,7 @@ defprotocol Gyx.Core.Spaces do
 
   @type space :: Discrete.t() | Box.t() | Tuple.t()
   @type discrete_point :: integer
-  @type box_point :: list(list(float))
+  @type box_point :: Nx.Type.t()
   @type tuple_point :: list(discrete_point | box_point())
   @type point :: box_point | discrete_point | tuple_point
   @doc """
@@ -73,11 +73,8 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Discrete do
 end
 
 defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
-  def sample(box_space) do
-    random_action =
-      box_space.shape
-      |> Tuple.to_list()
-      |> Enum.map(&get_rands(&1, box_space))
+  def sample(box_space = %{shape: shape}) do
+    random_action = Nx.random_uniform(shape)
 
     {:ok, random_action}
   end
