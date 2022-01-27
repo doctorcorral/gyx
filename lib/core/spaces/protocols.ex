@@ -91,8 +91,8 @@ defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
   end
 
   def contains?(box_space = %{high: h, low: l}, box_point) do
-    high_eval = (Nx.all(Nx.greater_equal(box_point, l)) ==  Nx.tensor(1, [type: {:u, 8}]))
-    low_eval = (Nx.all(Nx.less_equal(box_point, h)) ==  Nx.tensor(1, [type: {:u, 8}]))
-    high_eval && low_eval
+    high_eval = Nx.all(Nx.greater_equal(box_point, l)) == Nx.tensor(1, type: {:u, 8})
+    low_eval = Nx.all(Nx.less_equal(box_point, h)) == Nx.tensor(1, type: {:u, 8})
+    high_eval and low_eval
   end
 end
