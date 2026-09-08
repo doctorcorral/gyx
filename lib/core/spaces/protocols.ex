@@ -1,98 +1,155 @@
 defprotocol Gyx.Core.Spaces do
   @moduledoc """
-  This protocol defines basic functions to interact with
-  action and observation spaces.
+  Sampling and membership for action / observation spaces.
   """
-  alias Gyx.Core.Spaces.{Discrete, Box, Tuple}
+
+  alias Gyx.Core.Spaces.{Box, Discrete, Tuple}
 
   @type space :: Discrete.t() | Box.t() | Tuple.t()
-  @type discrete_point :: integer
-  @type box_point :: Nx.Type.t()
-  @type tuple_point :: list(discrete_point | box_point())
-  @type point :: box_point | discrete_point | tuple_point
-  @doc """
-  Samples a random point from a space.
-  Note that sampled points are very different in nature
-  depending on the underlying space.
-  This sampling is pretty important for an agent, as
-  it is the way the agent might decide which actions to take
-  from an action space defined on the environment the agent is
-  interacting with.
-  ## Parameters
+  @type point :: term()
 
-    - space: Any module representing a space.
-
-  ## Examples
-      iex> discrete_space = %Gyx.Core.Spaces.Discrete{n: 42}
-      %Gyx.Core.Spaces.Discrete{n: 42, random_algorithm: :exsplus, seed: {1,2,3}}
-
-      iex> Gyx.Core.Spaces.set_seed(discrete_space)
-      {%{
-        jump: #Function<16.10897371/1 in :rand.ml_alg/1>
-        max: 288230376151711743,
-        next: #Function<15.1089737/1 in :rand.mk_alg/1>
-        type: :explus
-      }, [72022415603679006 | 144185572652843231]}
-
-      iex> Gyx.Core.Spaces.sample(discrete_space)
-      {:ok, 35}
-
-      iex> Gyx.Core.Spaces.sample(%Gyx.Core.Spaces.Box{shape: {2}, high: 7}
-      {:ok, [[3.173570417347619, 0.286615818442874]]}
-  """
-  @spec sample(space()) :: {atom(), point()}
+  @spec sample(space()) :: {:ok, point()}
   def sample(space)
 
-  @doc """
-  Verifies if a particular action or observation point lies inside a given space.
-
-  ## Examples
-      iex> box_space = %Box{shape: {1, 2}}
-      iex> {:ok, box_point} = Spaces.sample(box_space)
-      iex> Spaces.contains(box_space, box_point)
-      true
-  """
-  @spec contains?(space(), point()) :: bool()
+  @spec contains?(space(), point()) :: boolean()
   def contains?(space, point)
 
-  @doc """
-  Sets the random generator used by `sample/1` with the
-  space defined seed.
-  """
   Kernel.defdelegate(set_seed(space), to: Gyx.Core.Spaces.Shared)
 end
 
 defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Discrete do
-  def sample(discrete_space) do
-    {:ok, :rand.uniform(discrete_space.n) - 1}
+  def sample(%{n: n}) when is_integer(n) and n > 0 do
+    {:ok, :rand.uniform(n) - 1}
   end
 
-  def contains?(discrete_space, discrete_point) do
-    discrete_point in 0..(discrete_space.n - 1)
+  def contains?(%{n: n}, point) when is_integer(point) and is_integer(n) do
+    point >= 0 and point < n
   end
+
+  def contains?(_space, _point), do: false
 end
 
 defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Box do
-  def sample(box_space = %{shape: shape, high: 1.0, low: 0.0}) do
-    random_action = Nx.random_uniform(shape)
+  alias Gyx.Core.Spaces.Box
 
-    {:ok, random_action}
+  def sample(%Box{} = space) do
+    if Box.tensor?(space) do
+      {:ok, sample_tensor(space)}
+    else
+      {:ok, sample_shape(Tuple.to_list(space.shape), space.low, space.high)}
+    end
   end
 
-  def sample(box_space = %{shape: shape, high: h, low: l}) do
-    raw_random_action = Nx.random_uniform(shape)
-    delta = Nx.add(h, Nx.negate(l))
-
-    random_action =
-      raw_random_action
-      |> Nx.map([type: {:f, 32}], fn x -> Nx.add(Nx.multiply(x, delta), l) end)
-
-    {:ok, random_action}
+  def contains?(%Box{} = space, %Nx.Tensor{} = tensor) do
+    Nx.shape(tensor) == space.shape and type_matches?(tensor, space.dtype) and
+      tensor_in_bounds?(tensor, space)
   end
 
-  def contains?(box_space = %{high: h, low: l}, box_point) do
-    high_eval = (Nx.all(Nx.greater_equal(box_point, l)) ==  Nx.tensor(1, [type: {:u, 8}]))
-    low_eval = (Nx.all(Nx.less_equal(box_point, h)) ==  Nx.tensor(1, [type: {:u, 8}]))
-    high_eval && low_eval
+  def contains?(%Box{} = space, point) do
+    not Box.tensor?(space) and matches_shape?(point, Tuple.to_list(space.shape)) and
+      within_bounds?(point, space.low, space.high)
   end
+
+  defp sample_tensor(%Box{shape: shape, dtype: dtype, low: low, high: high}) do
+    n = shape |> Tuple.to_list() |> Enum.product()
+    lo = bound_num(low)
+    hi = bound_num(high)
+
+    case dtype do
+      :u8 ->
+        span = max(trunc(hi) - trunc(lo) + 1, 1)
+
+        1..n
+        |> Enum.map(fn _ -> trunc(lo) + :rand.uniform(span) - 1 end)
+        |> :erlang.list_to_binary()
+        |> Nx.from_binary(:u8)
+        |> Nx.reshape(shape)
+
+      _ ->
+        1..n
+        |> Enum.map(fn _ -> uniform(lo, hi) end)
+        |> Nx.tensor(type: Box.nx_type(dtype))
+        |> Nx.reshape(shape)
+    end
+  end
+
+  defp type_matches?(tensor, dtype) do
+    Nx.type(tensor) == Box.nx_type(dtype)
+  end
+
+  defp tensor_in_bounds?(_tensor, %Box{dtype: :u8}), do: true
+
+  defp tensor_in_bounds?(tensor, %Box{low: low, high: high})
+       when is_number(low) and is_number(high) do
+    Nx.to_number(Nx.reduce_min(tensor)) >= low and Nx.to_number(Nx.reduce_max(tensor)) <= high
+  end
+
+  defp tensor_in_bounds?(_tensor, _space), do: true
+
+  defp bound_num(bound) when is_number(bound), do: bound * 1.0
+  defp bound_num(bound) when is_tuple(bound), do: elem(bound, 0) * 1.0
+
+  defp sample_shape([n], low, high) when is_integer(n) do
+    List.to_tuple(Enum.map(0..(n - 1), fn i -> uniform(bound_at(low, i), bound_at(high, i)) end))
+  end
+
+  defp sample_shape([n | rest], low, high) do
+    List.to_tuple(Enum.map(1..n, fn _ -> sample_shape(rest, low, high) end))
+  end
+
+  defp matches_shape?(point, [1]) when is_number(point), do: true
+  defp matches_shape?(point, [n]) when is_tuple(point), do: tuple_size(point) == n
+  defp matches_shape?(point, [n]) when is_list(point), do: length(point) == n
+
+  defp matches_shape?(point, [n | rest]) when is_tuple(point) and tuple_size(point) == n do
+    point |> Tuple.to_list() |> Enum.all?(&matches_shape?(&1, rest))
+  end
+
+  defp matches_shape?(point, [n | rest]) when is_list(point) and length(point) == n do
+    Enum.all?(point, &matches_shape?(&1, rest))
+  end
+
+  defp matches_shape?(_, _), do: false
+
+  defp within_bounds?(point, low, high) when is_number(point) do
+    value_in?(point, bound_at(low, 0), bound_at(high, 0))
+  end
+
+  defp within_bounds?(point, low, high) when is_tuple(point) do
+    point
+    |> Tuple.to_list()
+    |> Enum.with_index()
+    |> Enum.all?(fn {v, i} -> value_in?(v, bound_at(low, i), bound_at(high, i)) end)
+  end
+
+  defp within_bounds?(point, low, high) when is_list(point) do
+    point
+    |> Enum.with_index()
+    |> Enum.all?(fn {v, i} -> value_in?(v, bound_at(low, i), bound_at(high, i)) end)
+  end
+
+  defp value_in?(v, low, high) when is_number(v), do: v >= low and v <= high
+  defp value_in?(v, low, high), do: within_bounds?(v, low, high)
+
+  defp bound_at(bound, _i) when is_number(bound), do: bound
+  defp bound_at(bound, i) when is_tuple(bound), do: elem(bound, i)
+
+  defp uniform(low, high), do: low + :rand.uniform() * (high - low)
+end
+
+defimpl Gyx.Core.Spaces, for: Gyx.Core.Spaces.Tuple do
+  alias Gyx.Core.Spaces
+
+  def sample(%{spaces: spaces}) when is_list(spaces) do
+    {:ok, List.to_tuple(Enum.map(spaces, fn space -> elem(Spaces.sample(space), 1) end))}
+  end
+
+  def contains?(%{spaces: spaces}, point) when is_tuple(point) and is_list(spaces) do
+    tuple_size(point) == length(spaces) and
+      spaces
+      |> Enum.with_index()
+      |> Enum.all?(fn {space, i} -> Spaces.contains?(space, elem(point, i)) end)
+  end
+
+  def contains?(_space, _point), do: false
 end

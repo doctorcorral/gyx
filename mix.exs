@@ -4,51 +4,53 @@ defmodule Gyx.MixProject do
   def project do
     [
       app: :gyx,
-      version: "0.1.25",
-      elixir: "~> 1.7",
+      version: "0.2.0",
+      elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
+      elixirc_paths: elixirc_paths(Mix.env()),
       description: description(),
       package: package(),
-      deps: deps()
+      deps: deps(),
+      docs: [
+        main: "readme",
+        extras: ["README.md"]
+      ]
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       mod: {Gyx.Application, []},
-      extra_applications: [:logger]
+      extra_applications: [:logger, :crypto]
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
+  defp elixirc_paths(:test), do: ["lib"]
+  defp elixirc_paths(_), do: ["lib"]
+
   defp deps do
     [
-      # {:dep_from_hexpm, "~> 0.3.0"},
-      # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"},
-      {:nx, "~> 0.1"},
-      {:earmark, "~> 1.2", only: :dev},
-      {:ex_doc, "~> 0.19", only: :dev},
-      {:credo, "~> 1.0.0", only: [:dev, :test], runtime: false},
-      {:erlport, "~> 0.10.0"},
-      {:distillery, "~> 1.5", runtime: false},
-      {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
-      {:matrex, "~> 0.6"},
-      {:observer_cli, "~> 1.5"},
-      {:libcluster, "~> 3.0"}
+      {:jason, "~> 1.4"},
+      {:nx, "~> 0.9"},
+      {:exla, "~> 0.9"},
+      {:axon, "~> 0.7"},
+      {:synthex, path: "../synthex", optional: true},
+      {:ex_doc, "~> 0.34", only: :dev, runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev], runtime: false}
     ]
   end
 
   defp description do
     """
-    Gyx allows designing and training Reinforcement Learning tasks.
-    It includes environment abstractions that allows interaction with Python based environments like OpenAI Gym.
+    Native Elixir reinforcement learning: Gymnasium-like environments
+    and classical trainers, with a Mix CLI for experiments.
     """
   end
 
   defp package do
     [
-      files: ["lib", "mix.exs", "README*", "LICENSE*", "config"],
+      files: ["lib", "priv", "images", "mix.exs", "README*", "LICENSE*", "config"],
       maintainers: ["Ricardo Corral-Corral"],
       licenses: ["BSD-2-Clause"],
       links: %{"GitHub" => "https://github.com/doctorcorral/gyx"}
