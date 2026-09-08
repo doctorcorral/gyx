@@ -26,3 +26,11 @@ gyx-*.tar
 
 # Ignore elixir language server files
 /.elixir_ls/
+
+# Named experiment specs written by mix gyx.experiment / gyx.train --name
+/experiments/
+
+# Optional UI app builds in its own Mix project
+/ui/_build/
+/ui/deps/
+/ui/.elixir_ls/

@@ -1,33 +1,40 @@
 defmodule Gyx.Experience.ReplayBufferETSTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
+
+  alias Gyx.Core.Exp
   alias Gyx.Experience.ReplayBufferETS
 
-  @environment_module Gyx.Environments.Pure.Blackjack
-  @replay_buffer_module ReplayBufferETS
-  @target_size 13
+  test "stores and samples experiences" do
+    {:ok, buf} = ReplayBufferETS.start_link()
 
-  setup do
-    alias Gyx.Core.Spaces
-    {:ok, environment} = @environment_module.start_link([], [])
-    {:ok, replay} = @replay_buffer_module.start_link([], [])
-    action_space = :sys.get_state(environment).action_space
+    for i <- 1..13 do
+      ReplayBufferETS.add(buf, %Exp{
+        observation: i,
+        action: 0,
+        next_observation: i + 1,
+        reward: 1.0
+      })
+    end
 
-    Enum.map(1..@target_size, fn _ ->
-      @replay_buffer_module.add(
-        replay,
-        @environment_module.step(
-          environment,
-          with {:ok, action} <- Spaces.sample(action_space) do
-            action
-          end
-        )
-      )
-    end)
-
-    {:ok, replay_process: replay}
+    # casts are async; give ETS a beat
+    assert eventually(fn -> ReplayBufferETS.size(buf) == 13 end)
+    batch = ReplayBufferETS.get_batch(buf, {20, :random})
+    assert length(batch) == 13
+    latest = ReplayBufferETS.get_batch(buf, {3, :latest})
+    assert length(latest) == 3
   end
 
-  test "Replay Buffer ETS | size", %{replay_process: replay} do
-    assert length(@replay_buffer_module.get_batch(replay, {20, :random})) == @target_size
+  defp eventually(fun, attempts \\ 20) do
+    cond do
+      fun.() ->
+        true
+
+      attempts <= 0 ->
+        false
+
+      true ->
+        Process.sleep(5)
+        eventually(fun, attempts - 1)
+    end
   end
 end
