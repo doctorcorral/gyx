@@ -34,7 +34,7 @@ defmodule Gyx.MixProject do
       {:nx, "~> 0.9"},
       {:exla, "~> 0.9"},
       {:axon, "~> 0.7"},
-      {:synthex, path: "../synthex", optional: true},
+      {:synthex, github: "doctorcorral/synthex", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false}
