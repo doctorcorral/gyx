@@ -1,8 +1,8 @@
 defmodule Mix.Tasks.Gyx.Train do
   @shortdoc "Train a preset algorithm on a Gyx environment"
   @moduledoc """
-  Runs a `Gyx.Experiment` from a preset. Optionally writes the spec
-  (and returns) to `experiments/NAME.json`.
+  Runs a `Gyx.Experiment` from a preset. With `--name`, writes
+  `experiments/NAME/experiment.json` and `agent.bin`.
 
       mix gyx.train CartPole-v1
       mix gyx.train CartPole-v1 --algo q_learning --episodes 50
@@ -56,7 +56,7 @@ defmodule Mix.Tasks.Gyx.Train do
     if exp.name do
       dir = Keyword.get(opts, :dir, "experiments")
       :ok = Experiment.save(exp, dir)
-      Mix.shell().info("wrote #{Path.join(dir, exp.name <> ".json")}")
+      Mix.shell().info("wrote #{Experiment.root(dir, exp.name)}")
     end
   end
 
