@@ -34,7 +34,7 @@ Optional:
 
 * `python3` + `gymnasium` + `mujoco` — `gymnasium/*` MuJoCo C wraps and `mix gyx.bench`
 * `python3` + `gymnasium` + `ale-py` + ALE ROMs — `gymnasium/ALE/*` Atari
-* A sibling [synthex](https://github.com/doctorcorral/synthex) checkout — optional Mix dep at `../synthex`
+* [synthex](https://github.com/doctorcorral/synthex) — fetched from GitHub in `:dev` / `:test` only (`mix gyx.synthex`). Not a Hex package dependency.
 
 Classic control, Blackjack, FrozenLake, and the approximate `tree/`
 suite run with no Python.
@@ -451,8 +451,9 @@ dependency.
 
 ## Synthex
 
-When the optional `synthex` dep is present, Gyx can score candidates
-on CartPole or MountainCar without a Python env:
+`mix gyx.synthex` and `Gyx.Synthex.Probe` use `Synthex.Gym.Oracle`.
+This repo already lists Synthex as a GitHub `:dev` / `:test` dependency
+(Hex will not publish git deps). The scorer itself needs no Synthex:
 
 ```elixir
 scorer = Gyx.Synthex.Scorer.new("CartPole-v1")
