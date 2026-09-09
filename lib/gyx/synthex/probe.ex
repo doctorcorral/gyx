@@ -29,20 +29,21 @@ defmodule Gyx.Synthex.Probe do
     max_steps = Keyword.get(opts, :max_steps, 80)
     n = Keyword.get(opts, :candidates, 6)
     scorer = Keyword.get(opts, :scorer) || Gyx.Synthex.Scorer.new(env_id)
-    oracle = oracle!()
 
     {states, n_wins} =
-      apply(oracle, :get_trajectory_states, [
-        [],
-        default,
-        [env: env, seeds: seeds, max_steps: max_steps, scorer: scorer]
-      ])
+      Synthex.Gym.Oracle.get_trajectory_states([], default,
+        env: env,
+        seeds: seeds,
+        max_steps: max_steps,
+        scorer: scorer
+      )
 
     features =
-      apply(oracle, :generate_features, [
-        states,
-        [env: env, feature_types: [:axis], max_coeff: 1]
-      ])
+      Synthex.Gym.Oracle.generate_features(states,
+        env: env,
+        feature_types: [:axis],
+        max_coeff: 1
+      )
 
     stride = max(div(max(length(features), 1), n), 1)
 
@@ -53,13 +54,12 @@ defmodule Gyx.Synthex.Probe do
       |> Enum.map(&{:feat, &1})
 
     {scored, baseline, _} =
-      apply(oracle, :score_candidates, [
-        candidates,
-        stage,
-        default,
-        [],
-        [env: env, seeds: seeds, max_steps: max_steps, scorer: scorer]
-      ])
+      Synthex.Gym.Oracle.score_candidates(candidates, stage, default, [],
+        env: env,
+        seeds: seeds,
+        max_steps: max_steps,
+        scorer: scorer
+      )
 
     %{
       env: env_id,
@@ -70,16 +70,5 @@ defmodule Gyx.Synthex.Probe do
       scored: scored,
       candidates: candidates
     }
-  end
-
-  defp oracle! do
-    mod = Module.concat([Synthex, Gym, Oracle])
-
-    if Code.ensure_loaded?(mod) do
-      mod
-    else
-      raise ArgumentError,
-            ~s(Synthex is not available. Add {:synthex, github: "doctorcorral/synthex", only: [:dev, :test]} to mix.exs)
-    end
   end
 end

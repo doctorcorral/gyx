@@ -451,11 +451,9 @@ dependency.
 
 ## Synthex
 
-`Gyx.Synthex.Scorer` needs no extra dep. `Gyx.Synthex.Probe` and
-`mix gyx.synthex` call `Synthex.Gym.Oracle`, which this repo fetches
-from GitHub in `:dev` / `:test` only — Hex will not publish git or
-path dependencies. The scorer itself works on CartPole and MountainCar
-without Python:
+`mix gyx.synthex` and `Gyx.Synthex.Probe` use `Synthex.Gym.Oracle`.
+This repo already lists Synthex as a GitHub `:dev` / `:test` dependency
+(Hex will not publish git deps). The scorer itself needs no Synthex:
 
 ```elixir
 scorer = Gyx.Synthex.Scorer.new("CartPole-v1")
