@@ -43,7 +43,7 @@ suite run with no Python.
 
 ```elixir
 # mix.exs
-{:gyx, "~> 0.2.0"}
+{:gyx, "~> 0.3.0"}
 ```
 
 From this repo:
