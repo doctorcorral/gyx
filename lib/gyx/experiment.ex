@@ -2,11 +2,18 @@ defmodule Gyx.Experiment do
   @moduledoc """
   A named learning run: environment, algorithm, and trainer options.
 
-  Specs are JSON files under `experiments/` by default. `run/2` uses
-  `Gyx.Trainers.Presets` + `Gyx.Trainers.Episodic`. The Mix CLI and the
-  optional `ui/` app both call this module.
+  Each name is a directory under `experiments/` by default:
+
+      experiments/cart/experiment.json
+      experiments/cart/agent.bin
+
+  JSON is the spec and metrics. `agent.bin` is a versioned ETF of the
+  learned state. `encode` functions and Axon graphs are rebuilt from
+  `Gyx.Trainers.Presets` on load. The Mix CLI and the optional `ui/`
+  app both call this module.
   """
 
+  alias Gyx.Experiment.Checkpoint
   alias Gyx.Trainers.{Episodic, Presets}
 
   defstruct name: nil,
@@ -62,7 +69,9 @@ defmodule Gyx.Experiment do
 
   @spec run(t(), keyword()) :: t()
   def run(%__MODULE__{} = exp, opts \\ []) do
-    {agent, preset} = Presets.build(exp.algo, exp.env)
+    {fresh?, opts} = Keyword.pop(opts, :fresh, false)
+    {built, preset} = Presets.build(exp.algo, exp.env)
+    agent = if exp.agent && not fresh?, do: exp.agent, else: built
 
     train_opts =
       preset
@@ -84,34 +93,61 @@ defmodule Gyx.Experiment do
     }
   end
 
+  @doc """
+  Greedy evaluation of a checkpointed agent.
+
+  Pass `env:` to evaluate on another id (same observation/action
+  contract), e.g. native `Hopper-v4` → `gymnasium/Hopper-v4`.
+  """
+  @spec eval(t(), keyword()) :: t()
+  def eval(%__MODULE__{} = exp, opts \\ []) do
+    agent = exp.agent || raise ArgumentError, "experiment has no checkpoint"
+    env = opts |> Keyword.get(:env, exp.env) |> to_string()
+
+    eval_opts =
+      env
+      |> Presets.eval_opts()
+      |> then(fn preset ->
+        if env == exp.env, do: maybe_env_opts(preset, exp.env_opts), else: preset
+      end)
+      |> Keyword.merge(clean(opts, [:episodes, :max_steps, :seed]))
+
+    %{exp | eval_return: Episodic.evaluate(env, agent, eval_opts)}
+  end
+
   @spec save(t(), Path.t()) :: :ok | {:error, term()}
   def save(%__MODULE__{} = exp, dir \\ "experiments") do
     name = exp.name || raise ArgumentError, "experiment needs a :name to save"
-    File.mkdir_p!(dir)
-    File.write(path(dir, name), Jason.encode!(to_map(exp), pretty: true))
+    File.mkdir_p!(root(dir, name))
+
+    with :ok <- File.write(spec_path(dir, name), Jason.encode!(to_map(exp), pretty: true)) do
+      write_agent(exp, dir, name)
+    end
   end
 
   @spec load(String.t(), Path.t()) :: {:ok, t()} | {:error, term()}
   def load(name, dir \\ "experiments") do
-    with {:ok, json} <- File.read(path(dir, name)),
+    with {:ok, json} <- File.read(spec_path(dir, name)),
          {:ok, map} <- Jason.decode(json) do
-      {:ok, from_map(map)}
+      attach_agent(from_map(map), dir, name)
     end
   end
 
   @spec list(Path.t()) :: [String.t()]
   def list(dir \\ "experiments") do
     case File.ls(dir) do
-      {:ok, files} ->
-        files
-        |> Enum.filter(&String.ends_with?(&1, ".json"))
-        |> Enum.map(&String.trim_trailing(&1, ".json"))
+      {:ok, names} ->
+        names
+        |> Enum.filter(&File.regular?(spec_path(dir, &1)))
         |> Enum.sort()
 
       {:error, _} ->
         []
     end
   end
+
+  @spec root(Path.t(), String.t()) :: Path.t()
+  def root(dir, name), do: Path.join(dir, name)
 
   @spec to_map(t()) :: map()
   def to_map(%__MODULE__{} = exp) do
@@ -125,6 +161,7 @@ defmodule Gyx.Experiment do
       "returns" => exp.returns,
       "eval_return" => exp.eval_return
     }
+    |> maybe_checkpoint(exp.agent)
   end
 
   @spec from_map(map()) :: t()
@@ -141,7 +178,39 @@ defmodule Gyx.Experiment do
     |> Map.put(:eval_return, map["eval_return"])
   end
 
-  defp path(dir, name), do: Path.join(dir, "#{name}.json")
+  defp spec_path(dir, name), do: Path.join(root(dir, name), "experiment.json")
+  defp agent_path(dir, name), do: Path.join(root(dir, name), "agent.bin")
+
+  defp attach_agent(exp, dir, name) do
+    case File.read(agent_path(dir, name)) do
+      {:ok, bin} ->
+        case Checkpoint.restore(exp, bin) do
+          {:ok, agent} -> {:ok, %{exp | agent: agent}}
+          {:error, reason} -> {:error, reason}
+        end
+
+      {:error, :enoent} ->
+        {:ok, exp}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp write_agent(%{agent: nil}, dir, name) do
+    _ = File.rm(agent_path(dir, name))
+    :ok
+  end
+
+  defp write_agent(exp, dir, name) do
+    File.write(agent_path(dir, name), Checkpoint.dump(exp))
+  end
+
+  defp maybe_checkpoint(map, nil), do: map
+
+  defp maybe_checkpoint(map, _agent) do
+    Map.put(map, "checkpoint", %{"v" => 1, "format" => "etf", "file" => "agent.bin"})
+  end
 
   defp put_if(opts, nil, _key), do: opts
   defp put_if(opts, value, key), do: Keyword.put(opts, key, value)

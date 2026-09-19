@@ -43,7 +43,7 @@ suite run with no Python.
 
 ```elixir
 # mix.exs
-{:gyx, "~> 0.2.0"}
+{:gyx, "~> 0.3.0"}
 ```
 
 From this repo:
@@ -286,15 +286,21 @@ exp = Gyx.Experiment.run(exp, episodes: 20, on_progress: fn info -> IO.inspect(i
 exp.eval_return
 exp.returns
 
-:ok = Gyx.Experiment.save(exp)          # experiments/cart.json
+:ok = Gyx.Experiment.save(exp)          # experiments/cart/{experiment.json,agent.bin}
 {:ok, exp} = Gyx.Experiment.load("cart")
+exp.agent
+Gyx.Experiment.eval(exp)
 Gyx.Experiment.list()
 ```
 
-JSON stores the spec and the recorded returns. It does **not**
-persist the trained agent (Nx params). `episodes` / `max_steps` left
-`nil` mean “use the preset at `run/2` time” — `new/1` does not build
-the agent, so creating an Atari experiment does not compile the CNN.
+`experiment.json` is the spec and returns. `agent.bin` is a versioned
+ETF of the learned state (Q-table, REINFORCE weights, or Axon
+params). `encode` and the Axon graph are rebuilt from the preset on
+load. `run/2` resumes from `agent` unless you pass `fresh: true`.
+
+`episodes` / `max_steps` left `nil` mean “use the preset at `run/2`
+time” — `new/1` does not build the agent, so creating an Atari
+experiment does not compile the CNN.
 
 Default directory is `experiments/` (gitignored). Override with
 `--dir` on the Mix tasks.
@@ -342,7 +348,7 @@ mix gyx.train gymnasium/ALE/Pong-v5 --algo a2c --name pong
 | --- | --- |
 | `--algo` | `q_learning` / `sarsa` / `reinforce` / `a2c` (default) / `ppo` |
 | `--episodes`, `--max_steps`, `--seed` | override the preset |
-| `--name`, `--dir` | write `DIR/NAME.json` after the run |
+| `--name`, `--dir` | write `DIR/NAME/` (JSON + `agent.bin`) after the run |
 
 **Named experiments**
 
@@ -351,10 +357,14 @@ mix gyx.experiment new cart --env CartPole-v1 --algo a2c
 mix gyx.experiment list
 mix gyx.experiment show cart
 mix gyx.experiment run cart --episodes 20
+mix gyx.experiment run cart --fresh
+mix gyx.experiment eval cart
+mix gyx.experiment eval cart --env gymnasium/Hopper-v4
 ```
 
-`run` reloads the JSON, trains, evaluates, and writes returns back.
-The agent is still in-memory only.
+`run` loads the directory, trains (resuming `agent.bin` when present),
+evaluates, and writes both files back. `--fresh` discards the
+checkpoint. `eval` is greedy-only and can target another env id.
 
 **Bench** — wall-clock `reset`/`step`, no rendering, random actions
 
